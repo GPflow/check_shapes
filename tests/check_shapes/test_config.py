@@ -16,7 +16,7 @@ from typing import Union
 import pytest
 import tensorflow as tf
 
-from gpflow.experimental.check_shapes.config import (
+from check_shapes.config import (
     DocstringFormat,
     ShapeCheckingState,
     disable_check_shapes,

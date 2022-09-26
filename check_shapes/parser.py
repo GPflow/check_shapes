@@ -16,7 +16,18 @@
 
 from abc import ABC
 from dataclasses import replace
-from typing import Any, Collection, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Type
+from typing import (
+    Any,
+    Collection,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+)
 
 from lark.exceptions import UnexpectedInput
 from lark.lark import Lark
@@ -660,7 +671,7 @@ def parse_and_rewrite_docstring(
 
     assert docstring_format == DocstringFormat.SPHINX, (
         f"Current docstring format is {docstring_format}, but I don't know how to rewrite that."
-        " See `gpflow.experimental.check_shapes.config.set_rewrite_docstrings`."
+        " See `check_shapes.config.set_rewrite_docstrings`."
     )
     result = _SPHINX_DOCSTRING_PARSER.parse(docstring, (docstring, function_spec), context)
     assert isinstance(result, str)

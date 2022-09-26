@@ -19,8 +19,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Union
 
-from gpflow.experimental.check_shapes import Dimension, Shape, register_get_shape
-from gpflow.experimental.check_shapes.argument_ref import (
+from check_shapes import Dimension, Shape, register_get_shape
+from check_shapes.argument_ref import (
     AllElementsRef,
     ArgumentRef,
     AttributeArgumentRef,
@@ -29,7 +29,7 @@ from gpflow.experimental.check_shapes.argument_ref import (
     RootArgumentRef,
     ValuesRef,
 )
-from gpflow.experimental.check_shapes.bool_specs import (
+from check_shapes.bool_specs import (
     BoolTest,
     ParsedAndBoolSpec,
     ParsedArgumentRefBoolSpec,
@@ -37,8 +37,8 @@ from gpflow.experimental.check_shapes.bool_specs import (
     ParsedNotBoolSpec,
     ParsedOrBoolSpec,
 )
-from gpflow.experimental.check_shapes.error_contexts import ErrorContext, MessageBuilder
-from gpflow.experimental.check_shapes.specs import (
+from check_shapes.error_contexts import ErrorContext, MessageBuilder
+from check_shapes.specs import (
     ParsedArgumentSpec,
     ParsedDimensionSpec,
     ParsedNoteSpec,

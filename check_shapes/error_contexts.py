@@ -22,7 +22,7 @@ The :class:`MessageBuilder` is used to format / indent messages nicely.
 The :class:`ErrorContext` is a reusable bit of information about where/why an error occurred that
 can be written to a :class:`MessageBuilder`.
 
-:class:`ErrorContext`\ s can be composed using the :class:`StackContext` and
+:class:`ErrorContext`\\ s can be composed using the :class:`StackContext` and
 :class:`ParallelContext`.
 
 This allows reusable error messages in a consistent format.
@@ -59,7 +59,7 @@ _UNKNOWN_FILE = "<Unknown file>"
 _UNKNOWN_LINE = "<Unknown line>"
 _DISABLED_FILE_AND_LINE = (
     f"{_UNKNOWN_FILE}:{_UNKNOWN_LINE}"
-    " (Disabled. Call gpflow.experimental.check_shapes.set_enable_function_call_precompute(True) to"
+    " (Disabled. Call check_shapes.set_enable_function_call_precompute(True) to"
     " see this. (Slow.))"
 )
 _NONE_SHAPE = "<Tensor is None or has unknown shape>"
@@ -225,7 +225,9 @@ class ParallelContext(ErrorContext):
         by_head: Dict[ErrorContext, List[ErrorContext]] = {}
         for child in flat:
             if isinstance(child, StackContext):
-                head, body = _split_head(child)
+                split_child = _split_head(child)
+                head: ErrorContext = split_child[0]
+                body: Optional[ErrorContext] = split_child[1]
             else:
                 head = child
                 body = None

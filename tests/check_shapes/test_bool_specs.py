@@ -19,8 +19,8 @@ from typing import Any, List, Mapping, Tuple
 
 import pytest
 
-from gpflow.experimental.check_shapes.bool_specs import ParsedBoolSpec
-from gpflow.experimental.check_shapes.error_contexts import (
+from check_shapes.bool_specs import ParsedBoolSpec
+from check_shapes.error_contexts import (
     ArgumentContext,
     ErrorContext,
     ObjectValueContext,

@@ -5,11 +5,92 @@ description = "A library for annotating and checking the shapes of tensors."
 authors = ["Jesper Nielsen <jespernielsen1982+check_shapes@gmail.com>", "The GPflow Contributors"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "~3.9"
+tensorflow = "~2.9"
+tensorflow-probability = "~0.15"
+# python = ">=3.7,<3.11"
+# tensorflow = "^2.4.0"
+# tensorflow-probability = ">=0.12.0"
+lark = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+black = "^20.8b1"
+click = "<8.1.0"  # Unneeded - exists to manage dependencies.
+isort = "^5.10.0"
+mypy = "^0.910"
+pylint = "^2.13.0"
+pytest = "^5.4.0"
+taskipy = "^1.10.0"
+tomlkit = "^0.11.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+py_version=37
+profile="black"
+
+[tool.black]
+target-version = ['py37']
+line-length = 100
+
+[tool.mypy]
+python_version = "3.7"
+show_error_codes = true
+# First we turn on *all the checks*, and then we turn off those that are too annoying.
+strict = true
+# disallow_subclassing_any = false
+# disallow_untyped_calls = false
+disallow_untyped_decorators = false
+# ; This is needed because version 1.20.0 of NumPy introduces typing, so some ignores are necessary /
+# ; unnecessary depending on the version of numpy:
+warn_unused_ignores = false
+
+
+
+[[tool.mypy.overrides]]
+module = [
+    "tensorflow.*",
+    "tensorflow_probability.*",
+    "pytest.*",
+    "_pytest.*",
+]
+ignore_missing_imports = true
+
+
+[tool.taskipy.tasks]
+isort = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX isort XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    isort check_shapes tests
+"""
+isort_check = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX isort XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    isort --check-only check_shapes tests
+"""
+black = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX black XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    black check_shapes tests
+"""
+black_check = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX black XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    black --check check_shapes tests
+"""
+mypy = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX mypy XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    mypy $(python -m check_shapes.mypy_flags) check_shapes tests
+"""
+pylint = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX pylint XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    pylint check_shapes tests
+"""
+pytest = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX pytest XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    pytest check_shapes tests
+"""
+
+format = "task isort && task black"
+format_check = "task isort_check && task black_check"
+lint = "task format_check && task mypy && task pylint"
+format_and_test = "task format && task mypy && task pylint && task pytest"
+test = "task lint && task pytest"

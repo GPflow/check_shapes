@@ -13,17 +13,18 @@
 # limitations under the License.
 
 # pylint: disable=unused-argument  # Bunch of fake functions below has unused arguments.
+# pylint: disable=line-too-long  # We are testing some very long outputs.
 
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
 import pytest
 
-from gpflow.experimental.check_shapes import check_shapes
-from gpflow.experimental.check_shapes.config import set_rewrite_docstrings
-from gpflow.experimental.check_shapes.exceptions import SpecificationParseError
-from gpflow.experimental.check_shapes.parser import parse_and_rewrite_docstring, parse_function_spec
-from gpflow.experimental.check_shapes.specs import ParsedFunctionSpec, ParsedNoteSpec
+from check_shapes import check_shapes
+from check_shapes.config import set_rewrite_docstrings
+from check_shapes.exceptions import SpecificationParseError
+from check_shapes.parser import parse_and_rewrite_docstring, parse_function_spec
+from check_shapes.specs import ParsedFunctionSpec, ParsedNoteSpec
 
 from .utils import (
     TestContext,

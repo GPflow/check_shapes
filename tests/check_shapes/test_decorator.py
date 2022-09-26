@@ -19,13 +19,13 @@ from typing import Mapping, Optional, Sequence, Tuple
 
 import pytest
 
-from gpflow.experimental.check_shapes import (
+from check_shapes import (
     check_shape,
     check_shapes,
     disable_check_shapes,
     get_check_shapes,
 )
-from gpflow.experimental.check_shapes.exceptions import ShapeMismatchError
+from check_shapes.exceptions import ShapeMismatchError
 
 from .utils import TestShaped, current_line, t, t_unk
 

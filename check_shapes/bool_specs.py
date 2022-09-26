@@ -20,7 +20,12 @@ from enum import Enum
 from typing import Any, Callable, Mapping, Tuple, cast
 
 from .argument_ref import ArgumentRef
-from .error_contexts import ErrorContext, ObjectValueContext, ParallelContext, StackContext
+from .error_contexts import (
+    ErrorContext,
+    ObjectValueContext,
+    ParallelContext,
+    StackContext,
+)
 
 
 class ParsedBoolSpec(ABC):

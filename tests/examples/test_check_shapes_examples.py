@@ -26,7 +26,7 @@ def test_example__basic() -> None:
 
     import tensorflow as tf
 
-    from gpflow.experimental.check_shapes import check_shapes
+    from check_shapes import check_shapes
 
     @tf.function
     @check_shapes(
@@ -53,8 +53,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from gpflow.base import AnyNDArray
-from gpflow.experimental.check_shapes import (
+from check_shapes import (
     DocstringFormat,
     ErrorContext,
     Shape,
@@ -74,6 +73,7 @@ from gpflow.experimental.check_shapes import (
     set_enable_function_call_precompute,
     set_rewrite_docstrings,
 )
+from check_shapes.base_types import AnyNDArray
 
 
 def test_example__disable__manual() -> None:

@@ -451,9 +451,9 @@ This library has built-in support for checking the shapes of:
 
 * Python built-in scalars: ``bool``, ``int``, ``float`` and ``str``.
 * Python built-in sequences: ``tuple`` and ``list``.
-* NumPy ``ndarray``\ s.
-* TensorFlow ``Tensor``\ s and ``Variable``\ s.
-* TensorFlow Probability ``DeferredTensor``\ s, including ``TransformedVariable`` and
+* NumPy ``ndarray``\\ s.
+* TensorFlow ``Tensor``\\ s and ``Variable``\\ s.
+* TensorFlow Probability ``DeferredTensor``\\ s, including ``TransformedVariable`` and
   :class:`gpflow.Parameter`.
 
 
@@ -489,6 +489,8 @@ from .decorator import check_shapes
 from .error_contexts import ErrorContext
 from .inheritance import inherit_check_shapes
 from .shapes import get_shape, register_get_shape
+
+__version__ = "0.1.0"
 
 __all__ = [
     "Dimension",

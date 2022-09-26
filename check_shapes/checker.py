@@ -15,9 +15,19 @@
 Class responsible for remembering and checking shapes.
 """
 from dataclasses import dataclass, field
-from typing import Any, DefaultDict, Dict, Iterable, List, Optional, Set, Tuple, TypeVar, Union
+from typing import (
+    Any,
+    DefaultDict,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
-from ..utils import experimental
 from .base_types import Dimension, Shape
 from .config import get_enable_check_shapes
 from .error_contexts import (
@@ -227,7 +237,6 @@ class ShapeChecker:
        :dedent:
     """
 
-    @experimental
     def __init__(self) -> None:
         self._variables: DefaultDict[str, _VariableState] = DefaultDict(_VariableState)
         self._observed_shapes: List[Tuple[Shape, ParsedTensorSpec, ErrorContext]] = []

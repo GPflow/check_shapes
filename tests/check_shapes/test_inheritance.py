@@ -20,13 +20,13 @@ from typing import Any, Callable, ContextManager
 
 import pytest
 
-from gpflow.experimental.check_shapes import (
+from check_shapes import (
     check_shape,
     check_shapes,
     disable_check_shapes,
     inherit_check_shapes,
 )
-from gpflow.experimental.check_shapes.exceptions import ShapeMismatchError
+from check_shapes.exceptions import ShapeMismatchError
 
 from .utils import TestShaped, current_line, t
 
@@ -242,7 +242,7 @@ def test_inherit_check_shapes__disable(enable_super: bool, enable_sub: bool) -> 
         typed_nullcontext if enable_sub else disable_check_shapes
     )
     call_context: Callable[[], ContextManager[Any]] = (
-        (lambda: pytest.raises(ShapeMismatchError))
+        (lambda: pytest.raises(ShapeMismatchError))  # type: ignore[no-any-return]
         if (enable_super and enable_sub)
         else typed_nullcontext
     )

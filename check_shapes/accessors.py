@@ -34,7 +34,7 @@ def maybe_get_check_shapes(func: Callable[..., Any]) -> Optional[Callable[[C], C
     :returns: The ``check_shapes`` that is wrapping ``func``, and ``None`` if no ``check_shapes`` is
         not wrapping ``func``.
     """
-    return getattr(func, "__check_shapes__", None)
+    return getattr(func, "__check_shapes__", None)  # type: ignore[no-any-return]
 
 
 def get_check_shapes(func: Callable[..., Any]) -> Callable[[C], C]:

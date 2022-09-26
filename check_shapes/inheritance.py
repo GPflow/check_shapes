@@ -17,14 +17,12 @@ Code for inheriting shape checks from a super class.
 import inspect
 from typing import Callable, Optional, cast
 
-from ..utils import experimental
 from .accessors import maybe_get_check_shapes
 from .base_types import C
 from .config import get_enable_check_shapes
 from .decorator import null_check_shapes
 
 
-@experimental
 def inherit_check_shapes(func: C) -> C:
     """
     Decorator that inherits the :func:`check_shapes` decoration from any overridden method in a

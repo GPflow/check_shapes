@@ -13,11 +13,7 @@
 # limitations under the License.
 import pytest
 
-from gpflow.experimental.check_shapes.specs import (
-    ParsedArgumentSpec,
-    ParsedFunctionSpec,
-    ParsedNoteSpec,
-)
+from check_shapes.specs import ParsedArgumentSpec, ParsedFunctionSpec, ParsedNoteSpec
 
 from .utils import barg, bc, make_arg_spec, make_argument_ref, make_shape_spec, varrank
 

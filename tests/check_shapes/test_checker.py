@@ -20,11 +20,18 @@ from typing import Any, Sequence, Tuple
 
 import pytest
 
-from gpflow.experimental.check_shapes import ShapeChecker, disable_check_shapes
-from gpflow.experimental.check_shapes.checker import TensorSpecLike
-from gpflow.experimental.check_shapes.exceptions import ShapeMismatchError, VariableTypeError
+from check_shapes import ShapeChecker, disable_check_shapes
+from check_shapes.checker import TensorSpecLike
+from check_shapes.exceptions import ShapeMismatchError, VariableTypeError
 
-from .utils import TestContext, current_line, make_shape_spec, make_tensor_spec, t, t_unk
+from .utils import (
+    TestContext,
+    current_line,
+    make_shape_spec,
+    make_tensor_spec,
+    t,
+    t_unk,
+)
 
 
 @dataclass(frozen=True)

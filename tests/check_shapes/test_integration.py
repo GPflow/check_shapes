@@ -23,14 +23,10 @@ import pytest
 import tensorflow as tf
 from packaging.version import Version
 
-from gpflow.base import AnyNDArray
-from gpflow.experimental.check_shapes import check_shape as cs
-from gpflow.experimental.check_shapes import (
-    check_shapes,
-    disable_check_shapes,
-    inherit_check_shapes,
-)
-from gpflow.experimental.check_shapes.exceptions import ShapeMismatchError
+from check_shapes import check_shape as cs
+from check_shapes import check_shapes, disable_check_shapes, inherit_check_shapes
+from check_shapes.base_types import AnyNDArray
+from check_shapes.exceptions import ShapeMismatchError
 
 
 def test_check_shapes__numpy() -> None:
@@ -67,7 +63,7 @@ def test_check_shapes__tensorflow__keras() -> None:
     def f(x: tf.Tensor) -> tf.Tensor:
         return x + 3
 
-    class SuperLayer(tf.keras.layers.Layer):
+    class SuperLayer(tf.keras.layers.Layer):  # type: ignore[misc]
         def __init__(self) -> None:
             super().__init__()
             self._b = tf.Variable(0.0)
@@ -86,7 +82,7 @@ def test_check_shapes__tensorflow__keras() -> None:
         def call(self, x: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
             return x - y + self._b
 
-    class MyModel(tf.keras.Model):
+    class MyModel(tf.keras.Model):  # type: ignore[misc]
         def __init__(self, join: SuperLayer) -> None:
             super().__init__()
             self._join = join

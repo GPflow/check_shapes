@@ -20,7 +20,6 @@ from typing import Any, Callable, Sequence, cast
 
 import tensorflow as tf
 
-from ..utils import experimental
 from .accessors import set_check_shapes
 from .argument_ref import RESULT_TOKEN
 from .base_types import C
@@ -50,7 +49,6 @@ def null_check_shapes(func: C) -> C:
     return func
 
 
-@experimental
 def check_shapes(*specs: str, tf_decorator: bool = False) -> Callable[[C], C]:
     """
     Decorator that checks the shapes of tensor arguments.

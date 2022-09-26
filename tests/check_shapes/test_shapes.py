@@ -17,9 +17,8 @@ import numpy as np
 import pytest
 import tensorflow as tf
 
-from gpflow.base import Parameter
-from gpflow.experimental.check_shapes import Shape, get_shape
-from gpflow.experimental.check_shapes.exceptions import NoShapeError
+from check_shapes import Shape, get_shape
+from check_shapes.exceptions import NoShapeError
 
 from .utils import TestContext
 
@@ -44,8 +43,6 @@ from .utils import TestContext
         # pylint: disable=unexpected-keyword-arg
         (tf.Variable(np.zeros((2, 4)), shape=[2, None]), (2, None)),
         (tf.Variable(np.zeros((2, 4)), shape=tf.TensorShape(None)), None),
-        (Parameter(3), ()),
-        (Parameter(np.zeros((4, 2))), (4, 2)),
     ],
 )
 def test_get_shape(shaped: Any, expected_shape: Shape) -> None:

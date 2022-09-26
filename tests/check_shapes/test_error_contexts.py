@@ -17,8 +17,8 @@ from unittest.mock import MagicMock
 import pytest
 from lark.exceptions import UnexpectedCharacters, UnexpectedEOF, UnexpectedToken
 
-from gpflow.experimental.check_shapes import set_enable_function_call_precompute
-from gpflow.experimental.check_shapes.error_contexts import (
+from check_shapes import set_enable_function_call_precompute
+from check_shapes.error_contexts import (
     ArgumentContext,
     AttributeContext,
     ConditionContext,
@@ -40,9 +40,17 @@ from gpflow.experimental.check_shapes.error_contexts import (
     TensorSpecContext,
     VariableContext,
 )
-from gpflow.experimental.check_shapes.specs import ParsedNoteSpec
+from check_shapes.specs import ParsedNoteSpec
 
-from .utils import TestContext, barg, bnot, bor, current_line, make_shape_spec, make_tensor_spec
+from .utils import (
+    TestContext,
+    barg,
+    bnot,
+    bor,
+    current_line,
+    make_shape_spec,
+    make_tensor_spec,
+)
 
 
 def to_str(context: ErrorContext) -> str:
@@ -364,8 +372,8 @@ def test_function_call_context__precompute__disabled() -> None:
 
     context = f()
 
-    assert f"""
-f called at: <Unknown file>:<Unknown line> (Disabled. Call gpflow.experimental.check_shapes.set_enable_function_call_precompute(True) to see this. (Slow.))
+    assert """
+f called at: <Unknown file>:<Unknown line> (Disabled. Call check_shapes.set_enable_function_call_precompute(True) to see this. (Slow.))
 """ == to_str(
         context
     )
@@ -731,7 +739,7 @@ Object type: builtins.dict
         (
             ObjectTypeContext(ObjectTypeContext(7)),
             """
-Object type: gpflow.experimental.check_shapes.error_contexts.ObjectTypeContext
+Object type: check_shapes.error_contexts.ObjectTypeContext
 """,
         ),
     ],
@@ -749,7 +757,7 @@ def test_object_type_context__nested_type() -> None:
 
     context = ObjectTypeContext(A.B())
     assert """
-Object type: tests.gpflow.experimental.check_shapes.test_error_contexts.test_object_type_context__nested_type.<locals>.A.B
+Object type: tests.check_shapes.test_error_contexts.test_object_type_context__nested_type.<locals>.A.B
 """ == to_str(
         context
     )

@@ -27,7 +27,7 @@ from .exceptions import NoShapeError
 
 if TYPE_CHECKING:  # pragma: no cover
     # Avoid cyclic imports:
-    from ...base import AnyNDArray
+    from .base_types import AnyNDArray
 else:
     AnyNDArray = Any
 GetShape = Callable[[Any, ErrorContext], Shape]
