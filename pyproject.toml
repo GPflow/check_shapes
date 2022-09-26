@@ -5,12 +5,15 @@ description = "A library for annotating and checking the shapes of tensors."
 authors = ["Jesper Nielsen <jespernielsen1982+check_shapes@gmail.com>", "The GPflow Contributors"]
 
 [tool.poetry.dependencies]
-python = "~3.9"
-tensorflow = "~2.9"
-tensorflow-probability = "~0.15"
-# python = ">=3.7,<3.11"
-# tensorflow = "^2.4.0"
-# tensorflow-probability = ">=0.12.0"
+python = ">=3.7,<3.11"
+tensorflow = "^2.4.0"
+tensorflow-probability = ">=0.12.0"
+# python = "~3.9"
+# tensorflow = "~2.9"
+# tensorflow-probability = "~0.17"
+# python = "~3.7"
+# tensorflow = "~2.4"
+# tensorflow-probability = "~0.12"
 lark = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
