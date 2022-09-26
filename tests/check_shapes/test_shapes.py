@@ -16,6 +16,7 @@ from typing import Any
 import numpy as np
 import pytest
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 from check_shapes import Shape, get_shape
 from check_shapes.exceptions import NoShapeError
@@ -43,6 +44,8 @@ from .utils import TestContext
         # pylint: disable=unexpected-keyword-arg
         (tf.Variable(np.zeros((2, 4)), shape=[2, None]), (2, None)),
         (tf.Variable(np.zeros((2, 4)), shape=tf.TensorShape(None)), None),
+        (tfp.util.TransformedVariable(3.0, tfp.bijectors.Exp()), ()),
+        (tfp.util.TransformedVariable(np.zeros((4, 2)), tfp.bijectors.Exp()), (4, 2)),
     ],
 )
 def test_get_shape(shaped: Any, expected_shape: Shape) -> None:
