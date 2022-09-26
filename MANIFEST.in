@@ -1,8 +1,0 @@
-include doc/sphinx/conf.py
-include doc/sphinx/*.rst
-include doc/sphinx/notebooks/*.ipynb
-include README.md
-include RELEASE.md
-include LICENSE
-include VERSION
-include gpflow/py.typed
