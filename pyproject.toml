@@ -2,7 +2,32 @@
 name = "check_shapes"
 version = "0.1.0"
 description = "A library for annotating and checking the shapes of tensors."
-authors = ["Jesper Nielsen <jespernielsen1982+check_shapes@gmail.com>", "The GPflow Contributors"]
+authors = [
+    "Jesper Nielsen <jespernielsen1982+check_shapes@gmail.com>",
+    "The GPflow Contributors",
+]
+license = "Apache License 2.0"
+
+homepage = "https://gpflow.github.io/check_shapes"
+repository = "https://github.com/GPflow/check_shapes"
+documentation = "https://gpflow.github.io/check_shapes"
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Debuggers",
+    "Typing :: Typed",
+]
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.11"
@@ -43,14 +68,10 @@ python_version = "3.7"
 show_error_codes = true
 # First we turn on *all the checks*, and then we turn off those that are too annoying.
 strict = true
-# disallow_subclassing_any = false
-# disallow_untyped_calls = false
 disallow_untyped_decorators = false
-# ; This is needed because version 1.20.0 of NumPy introduces typing, so some ignores are necessary /
-# ; unnecessary depending on the version of numpy:
+# This is needed because version 1.20.0 of NumPy introduces typing, so some ignores are necessary /
+# unnecessary depending on the version of numpy:
 warn_unused_ignores = false
-
-
 
 [[tool.mypy.overrides]]
 module = [
