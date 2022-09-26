@@ -6,8 +6,9 @@ authors = [
     "Jesper Nielsen <jespernielsen1982+check_shapes@gmail.com>",
     "The GPflow Contributors",
 ]
-license = "Apache License 2.0"
+license = "Apache-2.0"
 
+readme = "README.md"
 homepage = "https://gpflow.github.io/check_shapes"
 repository = "https://github.com/GPflow/check_shapes"
 documentation = "https://gpflow.github.io/check_shapes"
