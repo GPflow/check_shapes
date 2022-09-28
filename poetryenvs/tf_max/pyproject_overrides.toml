@@ -1,0 +1,5 @@
+[tool.poetry.dependencies]
+python = "3.10.*"
+tensorflow = "2.10.*"
+tensorflow-probability = "0.18.*"
+numpy = "1.21.*"  # Newer versions create backwards compatibility problems...

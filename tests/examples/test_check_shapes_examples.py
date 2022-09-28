@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# type: ignore[no-any-return]
 """
 Code examples used in `check_shapes` docstrings.
 """
@@ -683,7 +685,7 @@ def test_example__intermediate_results() -> None:
         "return: []",
     )
     def loss(weights: AnyNDArray, test_features: AnyNDArray, test_labels: AnyNDArray) -> AnyNDArray:
-        prediction = check_shape(test_features @ weights, "[n_rows, n_labels]")
+        prediction: AnyNDArray = check_shape(test_features @ weights, "[n_rows, n_labels]")
         error: AnyNDArray = check_shape(prediction - test_labels, "[n_rows, n_labels]")
         square_error = check_shape(error ** 2, "[n_rows, n_labels]")
         mean_square_error = check_shape(np.mean(square_error, axis=-1), "[n_rows]")

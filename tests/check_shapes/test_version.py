@@ -17,7 +17,7 @@ import tomlkit
 
 import check_shapes
 
-_PYPROJECT_PATH = Path(__file__).parent.parent / "pyproject.toml"
+_PYPROJECT_PATH = Path(__file__).parent.parent.parent / "pyproject.toml"
 
 
 def test_version() -> None:
