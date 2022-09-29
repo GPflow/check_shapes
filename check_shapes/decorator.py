@@ -60,7 +60,7 @@ def check_shapes(*specs: str, tf_decorator: bool = False) -> Callable[[C], C]:
        :end-before: [basic]
        :dedent:
 
-    :param specs: Specification of arguments to check. See: `Check specification`_.
+    :param specs: Specification of arguments to check. See: "Check specification" in our User Guide.
     :param tf_decorator: Whether to wrap the shape check with
         ``tf.compat.v1.flags.tf_decorator.make_decorator``.
         Setting this `True` seems to solve some problems, particularly related to Keras models,
