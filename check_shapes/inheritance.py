@@ -35,7 +35,7 @@ def inherit_check_shapes(func: C) -> C:
        :end-before: [reuse__inherit_check_shapes]
        :dedent:
 
-    See: `Class inheritance`_.
+    See: "Class inheritance" in our User Guide.
     """
     if not get_enable_check_shapes():
         return null_check_shapes(func)
