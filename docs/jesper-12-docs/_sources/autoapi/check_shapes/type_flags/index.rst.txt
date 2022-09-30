@@ -1,0 +1,28 @@
+:py:mod:`check_shapes.type_flags`
+=================================
+
+.. py:module:: check_shapes.type_flags
+
+.. autoapi-nested-parse::
+
+   Code for setting type hints, depending on library versions.
+
+
+
+Module Contents
+---------------
+
+.. py:data:: NP_TYPE_CHECKING
+   :annotation: = False
+
+   Whether to type-check numpy arrays at all. Defaults to False, because we don't know which
+   versions a client might use.
+
+
+.. py:data:: GENERIC_NP_ARRAYS
+   
+
+   Whether to use generic numpy arrays. This is not applied at all, if type checking and not
+   `NP_TYPE_CHECKING`.
+
+

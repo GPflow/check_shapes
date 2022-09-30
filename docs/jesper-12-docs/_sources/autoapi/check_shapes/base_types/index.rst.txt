@@ -1,0 +1,32 @@
+:py:mod:`check_shapes.base_types`
+=================================
+
+.. py:module:: check_shapes.base_types
+
+.. autoapi-nested-parse::
+
+   Definitions of commonly used types.
+
+
+
+Module Contents
+---------------
+
+.. py:data:: Dimension
+   
+
+   The size of a single observed dimension.
+
+   Use `None` if the size of that dimension is unknown.
+
+
+.. py:data:: Shape
+   
+
+   The complete shape of an observed object.
+
+   Use `None` if the object has a shape, but the shape is unknown.
+
+   Raise an exception if objects of that type can never have a shape.
+
+

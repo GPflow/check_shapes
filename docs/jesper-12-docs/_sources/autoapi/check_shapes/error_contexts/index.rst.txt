@@ -1,0 +1,391 @@
+:py:mod:`check_shapes.error_contexts`
+=====================================
+
+.. py:module:: check_shapes.error_contexts
+
+.. autoapi-nested-parse::
+
+   Infrastructure for describing the context of an error.
+
+   The :class:`MessageBuilder` is used to format / indent messages nicely.
+
+   The :class:`ErrorContext` is a reusable bit of information about where/why an error occurred that
+   can be written to a :class:`MessageBuilder`.
+
+   :class:`ErrorContext`\ s can be composed using the :class:`StackContext` and
+   :class:`ParallelContext`.
+
+   This allows reusable error messages in a consistent format.
+
+
+
+Module Contents
+---------------
+
+.. py:data:: _NO_VALUE
+   
+
+   Sentinel to represent "no value" in places where ``None`` is a valid value.
+
+
+.. py:class:: MessageBuilder(indent_str = '')
+
+   Utility for formatting nested text.
+
+   .. py:method:: add_line(text)
+
+      Write a line, indented at the current level.
+
+      Input is converted to a `str` using `str(text)`.
+
+
+   .. py:method:: add_columned_line(*texts)
+
+      Write a line of several values, left-aligned within the current indentation level.
+
+      Inputs are converted to `str`s using `str(text)`.
+
+
+   .. py:method:: indent()
+
+      Context manager for indenting text.
+
+
+   .. py:method:: build()
+
+      Compile all collected text into a single string.
+
+
+
+.. py:class:: ErrorContext
+
+   Bases: :py:obj:`abc.ABC`
+
+   A context in which an error can occur.
+
+   Contexts should be immutable, and implement :func:`__eq__` - so that they can be composed using
+   :class:`StackContext` and :class:`ParallelContext`.
+
+   The contexts are often created even if an error doesn't actually occur, so they should be cheap
+   to create - prefer to do any slow computation in :func:`print`, rather than in :func:`__init__`.
+
+   Maybe think of an :class:`ErrorContext` as a factory of error messages.
+
+   .. py:method:: print(builder)
+      :abstractmethod:
+
+      Print this context to the given `MessageBuilder`.
+
+
+
+.. py:class:: StackContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   Error context where one context is "inside" another one.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+
+.. py:class:: ParallelContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   Error context with many contexts in parallel.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+
+.. py:class:: FunctionCallContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error occured inside a function that was called.
+
+   Normally `print` should be called from within the called function: `func`.
+   If that is impossible, first call `precompute` from within `func`.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+   .. py:method:: precompute()
+
+      Precompute the values to print.
+
+      This is useful to capture the position of the stack of the relevant call, if this object is
+      saved for later use.
+
+      :returns: A new instance with precomptued values.
+
+
+
+.. py:class:: FunctionDefinitionContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error occured in the context of a function definition.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+
+.. py:class:: VariableContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error occurred in the context of a shape specification variable.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+
+.. py:class:: TensorSpecContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error occurred in the context of a tensor specification.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+
+.. py:class:: ArgumentContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error occurred in the context of an argument to a function.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+   .. py:method:: __eq__(other)
+
+      Return self==value.
+
+
+   .. py:method:: __hash__()
+
+      Return hash(self).
+
+
+
+.. py:class:: AttributeContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error occurred in the context of an attribute on an object.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+   .. py:method:: __eq__(other)
+
+      Return self==value.
+
+
+   .. py:method:: __hash__()
+
+      Return hash(self).
+
+
+
+.. py:class:: IndexContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error occurred in the context of an index in a sequence.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+   .. py:method:: __eq__(other)
+
+      Return self==value.
+
+
+   .. py:method:: __hash__()
+
+      Return hash(self).
+
+
+
+.. py:class:: MappingKeyContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error occurent in the context of a key in a map.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+   .. py:method:: __eq__(other)
+
+      Return self==value.
+
+
+   .. py:method:: __hash__()
+
+      Return hash(self).
+
+
+
+.. py:class:: MappingValueContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error occurent in the context of a value in a map.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+   .. py:method:: __eq__(other)
+
+      Return self==value.
+
+
+   .. py:method:: __hash__()
+
+      Return hash(self).
+
+
+
+.. py:class:: ConditionContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error occurred in a conditional context.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+
+.. py:class:: ShapeContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error occurred in the context of the shapes of function arguments.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+
+.. py:class:: NoteContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error occurred in a context where a user has added a note.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+
+.. py:class:: ObjectValueContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error was caused by the value of an object.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+   .. py:method:: __eq__(other)
+
+      Return self==value.
+
+
+   .. py:method:: __hash__()
+
+      Return hash(self).
+
+
+
+.. py:class:: ObjectTypeContext
+
+   Bases: :py:obj:`ErrorContext`
+
+   An error was caused by the type of an object.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+   .. py:method:: __eq__(other)
+
+      Return self==value.
+
+
+   .. py:method:: __hash__()
+
+      Return hash(self).
+
+
+
+.. py:class:: ParserInputContext
+
+   Bases: :py:obj:`ErrorContext`, :py:obj:`abc.ABC`
+
+   Abstract base class for contexts that relate to parser input.
+
+
+.. py:class:: LarkUnexpectedInputContext
+
+   Bases: :py:obj:`ParserInputContext`
+
+   An error was caused by an `UnexpectedInput` error from `Lark`.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+   .. py:method:: __hash__()
+
+      Return hash(self).
+
+
+
+.. py:class:: MultipleElementBoolContext
+
+   Bases: :py:obj:`ParserInputContext`
+
+   An error was caused by trying to use a multi-element argument specification as a bool.
+
+   .. py:method:: print(builder)
+
+      Print this context to the given `MessageBuilder`.
+
+
+
