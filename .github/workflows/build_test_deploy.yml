@@ -1,0 +1,59 @@
+name: build_test_deploy
+
+on:
+  push:
+  release:
+    types: [published]
+
+jobs:
+  test-base:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: poetry install
+      - run: poetry run task test
+
+  test-versions:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+          poetryenv: ["tf_min", "tf_max"]
+          include:
+            - poetryenv: "tf_min"
+              python: "3.7"
+            - poetryenv: "tf_max"
+              python: "3.10"
+
+    name: poetryenv-${{ matrix.poetryenv }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -r poetryenv_requirements.txt
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: ./poetryenv poetryenvs/${{ matrix.poetryenv}} install
+      - run: ./poetryenv poetryenvs/${{ matrix.poetryenv}} run task test
+
+  all-tests:
+    needs: [test-base, test-versions]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ok
+
+  deploy:
+    needs: all-tests
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: poetry build
+      - run: poetry publish -u __token__ -p ${{ secrets.CHECK_SHAPES_PYPI_TOKEN }}
