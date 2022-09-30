@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+title: check_shapes
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Jesper
+    family-names: Nielsen
+    email: jespernielsen1982+check_shapes@gmail.com
+    affiliation: Secondmind
+repository-code: 'https://github.com/GPflow/check_shapes'
+abstract: >-
+  A library for annotating and checking tensor
+  shapes.
+license: Apache-2.0
