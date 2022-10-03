@@ -65,7 +65,8 @@ def check_shape(
        :dedent:
 
     :param shaped: The object whose shape to check.
-    :param tensor_spec: Specification to check the tensor against. See: `Shape specification`_.
+    :param tensor_spec: Specification to check the tensor against. See "Shape specification" in our
+        User Guide.
     :param context: Information about where ``shaped`` is coming from, for improved error
         messages.
     :returns: ``shaped``, for convenience.

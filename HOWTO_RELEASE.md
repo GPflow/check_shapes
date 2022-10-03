@@ -1,19 +1,22 @@
 # How to make a new `check_shapes` release
 
-1. Check that [RELEASE.md](https://github.com/GPflow/check_shapes/blob/develop/RELEASE.md) contains
-   the up-to-date release notes for the next release.
-   - They should cover all changes, that are visible to library userso on the `develop` branch since
-     the most recent release.
-   - They should make clear to users whether they might benefit from this release and what backwards
-     incompatibilities they might face.
+1. Bump the version numbers in the `develop` branch, in *BOTH* the
+   [`pyproject.toml`](https://github.com/GPflow/check_shapes/blob/develop/pyproject.toml) file
+   and the
+   [`__init__`](https://github.com/GPflow/check_shapes/blob/develop/check_shapes/__init__.py).
 
-2. Bump the version numbers in the `develop` branch, in the
-   [`pyproject.toml`](https://github.com/GPflow/check_shapes/blob/develop/pyproject.toml) file.
-   Copy the RELEASE.md template for the following release-in-progress.
+2. Update [RELEASE.md](https://github.com/GPflow/check_shapes/blob/develop/RELEASE.md).
+   - Make sure it contains up-to-date release notes for the next release.
+     * They should cover all changes, that are visible to library userso on the `develop` branch
+       since the most recent release.
+     * They should make clear to users whether they might benefit from this release and what
+       backwards incompatibilities they might face.
+   - Make sure the release version matches what you were setting elsewhere.
+   - Make a new copy of the template, to prepare for the next release.
 
-3. Create a release PR from `develop` to `master`.
+3. Create a release PR from `develop` to `main`.
    - **Make a merge commit. DO NOT SQUASH-MERGE.**
-   - If you squash-merge, `master` will be *ahead* of develop (by the squash-merge commit). This
+   - If you squash-merge, `main` will be *ahead* of develop (by the squash-merge commit). This
      means we’ll end up with merge conflicts at the following release!
 
 4. Go to the [release page on GitHub](https://github.com/GPflow/check_shapes/releases/new) and
