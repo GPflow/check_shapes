@@ -27,6 +27,11 @@ Some concrete examples::
 
     ./poetryenv poetryenvs/tf_min/ update
     ./poetryenv poetryenvs/tf_min/ run task test
+
+You can use the `-r` flag to recursively find all environments and execute the same command::
+
+    ./poetryenv -r poetryenvs update
+    ./poetryenv -r poetryenvs run task test
 """
 import argparse
 import subprocess
@@ -119,30 +124,65 @@ def _update_pyproject_toml(overrides_path: Path) -> None:
     _write_toml(pyproject, _PYPROJECT_TOML)
 
 
-def poetryenv(env_dir: Path, poetry_args: List[str]) -> int:
+def _find_envs(root: Path) -> List[Path]:
+    assert root.is_dir()
+    result = []
+    if (root / "pyproject_overrides.toml").exists():
+        result.append(root)
+    for child in root.iterdir():
+        if child.is_dir():
+            result.extend(_find_envs(child))
+    return result
+
+
+def poetryenv(root_env_dir: Path, recursive: bool, poetry_args: List[str]) -> int:
     assert _PYPROJECT_TOML.is_file()
-    assert env_dir.is_dir()
+    assert root_env_dir.is_dir()
 
-    with ExitStack() as stack:
-        stack.enter_context(_backup_dir())
-        stack.enter_context(_shuffle(_PYPROJECT_TOML, env_dir, derived=False))
-        stack.enter_context(_shuffle(_POETRY_LOCK, env_dir, derived=True))
-        stack.enter_context(_shuffle(_VENV_DIR, env_dir, derived=True))
+    env_dirs = _find_envs(root_env_dir) if recursive else [root_env_dir]
 
-        env_pyproject_overrides_toml = env_dir / "pyproject_overrides.toml"
-        _update_pyproject_toml(env_pyproject_overrides_toml)
+    for env_dir in env_dirs:
+        if recursive:
+            print("Using environment:", env_dir)
+        with ExitStack() as stack:
+            stack.enter_context(_backup_dir())
+            stack.enter_context(_shuffle(_PYPROJECT_TOML, env_dir, derived=False))
+            stack.enter_context(_shuffle(_POETRY_LOCK, env_dir, derived=True))
+            stack.enter_context(_shuffle(_VENV_DIR, env_dir, derived=True))
 
-        command = " ".join(["poetry"] + poetry_args)
-        returncode = subprocess.run(command, shell=True, check=False).returncode
-    return returncode
+            env_pyproject_overrides_toml = env_dir / "pyproject_overrides.toml"
+            _update_pyproject_toml(env_pyproject_overrides_toml)
+
+            command = " ".join(["poetry"] + poetry_args)
+            returncode = subprocess.run(command, shell=True, check=False).returncode
+        if returncode != 0:
+            if recursive:
+                print("Stopping due to error from environment:", env_dir)
+            return returncode
+    return 0
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run poetry under alternative environments")
-    parser.add_argument("env_dir", type=Path, help="Directory containing the environment to use.")
-    parser.add_argument("poetry_args", nargs=argparse.REMAINDER, help="Command to pass to poetry.")
+    parser.add_argument(
+        "env_dir",
+        type=Path,
+        help="Directory containing the environment to use.",
+    )
+    parser.add_argument(
+        "--recursive",
+        "-r",
+        action="store_true",
+        help="If set env_dir is searched recursively"
+        " and poetry is executed for envirenments found.",
+    )
+    parser.add_argument(
+        "poetry_args",
+        nargs=argparse.REMAINDER,
+        help="Command to pass to poetry.",
+    )
     args = parser.parse_args()
-    sys.exit(poetryenv(args.env_dir, args.poetry_args))
+    sys.exit(poetryenv(args.env_dir, args.recursive, args.poetry_args))
 
 
 if __name__ == "__main__":

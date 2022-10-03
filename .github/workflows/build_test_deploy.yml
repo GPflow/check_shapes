@@ -23,14 +23,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        poetryenv: ["tf_min", "tf_max"]
+        framework: ["py", "np", "tf", "tfp", "jax", "torch"]
+        version: ["min", "max"]
         include:
-          - poetryenv: "tf_min"
+          - version: "min"
             python: "3.7"
-          - poetryenv: "tf_max"
+          - version: "max"
             python: "3.10"
 
-    name: test-${{ matrix.poetryenv }}
+    name: test-${{ matrix.framework }}-${{ matrix.version }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -38,8 +39,8 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: pip install -r poetryenv_requirements.txt
       - run: curl -sSL https://install.python-poetry.org | python3 -
-      - run: ./poetryenv poetryenvs/${{ matrix.poetryenv }} install
-      - run: ./poetryenv poetryenvs/${{ matrix.poetryenv }} run task test
+      - run: ./poetryenv poetryenvs/${{ matrix.framework }}_${{ matrix.version }} install
+      - run: ./poetryenv poetryenvs/${{ matrix.framework }}_${{ matrix.version }} run task test
 
   all-tests:
     needs: [test-base, test-versions]

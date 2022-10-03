@@ -15,24 +15,16 @@
 Code for extracting shapes from object.
 """
 import inspect
-from typing import TYPE_CHECKING, Any, Callable, Dict, Sequence, Tuple, Type, Union
-
-import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
+from typing import Any, Callable, Dict, Sequence, Type
 
 from .base_types import Shape
 from .error_contexts import ErrorContext, IndexContext, ObjectTypeContext, StackContext
 from .exceptions import NoShapeError
 
-if TYPE_CHECKING:  # pragma: no cover
-    # Avoid cyclic imports:
-    from .base_types import AnyNDArray
-else:
-    AnyNDArray = Any
 GetShape = Callable[[Any, ErrorContext], Shape]
 
 
+_GET_SHAPE_SENTINEL = object()
 _GET_SHAPES: Dict[Type[Any], GetShape] = {}
 
 
@@ -78,7 +70,14 @@ def get_shape(shaped: Any, context: ErrorContext) -> Shape:
         if getter is not None:
             return getter(shaped, context)
 
-    raise NoShapeError(StackContext(context, ObjectTypeContext(shaped)))
+    shape = getattr(shaped, "shape", _GET_SHAPE_SENTINEL)
+
+    if shape == _GET_SHAPE_SENTINEL:
+        raise NoShapeError(StackContext(context, ObjectTypeContext(shaped)))
+
+    assert shape is None or isinstance(shape, tuple), shape
+
+    return shape
 
 
 @register_get_shape(bool)
@@ -100,21 +99,3 @@ def get_sequence_shape(shaped: Sequence[Any], context: ErrorContext) -> Shape:
     if child_shape is None:
         return None
     return (len(shaped),) + child_shape
-
-
-@register_get_shape(np.ndarray)
-def get_ndarray_shape(shaped: AnyNDArray, context: ErrorContext) -> Shape:
-    result: Tuple[int, ...] = shaped.shape
-    return result
-
-
-@register_get_shape(tf.Tensor)
-@register_get_shape(tf.Variable)
-@register_get_shape(tfp.util.DeferredTensor)
-def get_tensorflow_shape(
-    shaped: Union[tf.Tensor, tf.Variable, tfp.util.DeferredTensor], context: ErrorContext
-) -> Shape:
-    shape = shaped.shape
-    if not shape:
-        return None
-    return tuple(shape)

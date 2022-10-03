@@ -16,9 +16,21 @@ Code for configuring check_shapes."
 """
 from contextlib import contextmanager
 from enum import Enum
-from typing import Iterator, Union
+from typing import Callable, Iterator, List, Union
 
-import tensorflow as tf
+IsCompiledMode = Callable[[], bool]
+
+
+_is_compiled_mode: List[IsCompiledMode] = []
+
+
+def add_is_compiled_mode(is_compiled_mode: IsCompiledMode) -> None:
+    """
+    Add a function for determining whether we are currently executing "compiled mode".
+
+    Used when func:`set_enable_check_shapes` is set to ``EAGER_MODE_ONLY``.
+    """
+    _is_compiled_mode.append(is_compiled_mode)
 
 
 class ShapeCheckingState(Enum):
@@ -49,7 +61,7 @@ class ShapeCheckingState(Enum):
             return True
         elif self is ShapeCheckingState.EAGER_MODE_ONLY:
             # pylint: disable=no-member
-            return not tf.inside_function()
+            return not any(is_compiled_mode() for is_compiled_mode in _is_compiled_mode)
         else:
             assert self is ShapeCheckingState.DISABLED, self
             return False

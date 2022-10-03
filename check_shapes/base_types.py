@@ -14,11 +14,7 @@
 """
 Definitions of commonly used types.
 """
-from typing import TYPE_CHECKING, Any, Callable, Optional, Tuple, TypeVar, Union
-
-import numpy as np
-
-from .type_flags import GENERIC_NP_ARRAYS, NP_TYPE_CHECKING
+from typing import Any, Callable, Optional, Tuple, TypeVar
 
 C = TypeVar("C", bound=Callable[..., Any])
 
@@ -37,14 +33,3 @@ Use `None` if the object has a shape, but the shape is unknown.
 
 Raise an exception if objects of that type can never have a shape.
 """
-
-if TYPE_CHECKING and (not NP_TYPE_CHECKING):  # pragma: no cover
-    AnyNDArray = Any
-else:
-    if GENERIC_NP_ARRAYS:
-        # It would be nice to use something more interesting than `Any` here, but it looks like
-        # the infrastructure in the rest of the ecosystem isn't really set up for this
-        # yet. Maybe when we get Python 3.11?
-        AnyNDArray = np.ndarray[Any, Any]  # type: ignore[misc]
-    else:
-        AnyNDArray = Union[np.ndarray]  # type: ignore[misc]

@@ -14,11 +14,12 @@
 from typing import Union
 
 import pytest
-import tensorflow as tf
 
 from check_shapes.config import (
     DocstringFormat,
     ShapeCheckingState,
+    _is_compiled_mode,
+    add_is_compiled_mode,
     disable_check_shapes,
     get_enable_check_shapes,
     get_enable_function_call_precompute,
@@ -30,7 +31,7 @@ from check_shapes.config import (
 
 
 @pytest.mark.parametrize(
-    "state,eager_expected,function_expected",
+    "state,eager_expected,compiled_expected",
     [
         (ShapeCheckingState.ENABLED, True, True),
         (ShapeCheckingState.EAGER_MODE_ONLY, True, False),
@@ -38,19 +39,20 @@ from check_shapes.config import (
     ],
 )
 def test_shape_checking_state__bool(
-    state: ShapeCheckingState, eager_expected: bool, function_expected: bool
+    state: ShapeCheckingState, eager_expected: bool, compiled_expected: bool
 ) -> None:
-    enabled = None
+    is_compiled = False
+    is_compiled_fn = lambda: is_compiled
+    add_is_compiled_mode(is_compiled_fn)
 
-    def run() -> None:
-        nonlocal enabled
-        enabled = bool(state)
+    try:
+        is_compiled = False
+        assert bool(state) == eager_expected
 
-    run()
-    assert eager_expected == enabled
-
-    tf.function(run)()  # pylint: disable=no-member
-    assert function_expected == enabled
+        is_compiled = True
+        assert bool(state) == compiled_expected
+    finally:
+        _is_compiled_mode.remove(is_compiled_fn)
 
 
 @pytest.mark.parametrize(

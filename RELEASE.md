@@ -50,8 +50,12 @@ This release contains contributions from:
 
 ## Major Features and Improvements
 
-* <INSERT MAJOR FEATURE HERE, USING MARKDOWN SYNTAX>
-* <IF RELEASE CONTAINS MULTIPLE FEATURES FROM SAME AREA, GROUP THEM TOGETHER>
+* Made `check_shapes` independent of tensor framework:
+  - Made NumPy optional.
+  - Made TensorFlow optional.
+  - Made TensorFlow-Probability optional.
+  - Added support for JAX.
+  - Added support for PyTorch.
 
 ## Bug Fixes and Other Changes
 
