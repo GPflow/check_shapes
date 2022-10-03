@@ -24,6 +24,26 @@ Example:
    :end-before: [basic]
    :dedent:
 
+Main features include:
+
+* Supports NumPy and TensorFlow out-of-the-box, and easy to extend to other frameworks.
+* Checking the shapes of function arguments and return types, using a decorator.
+* Checking the shapes of local values, using a function.
+* Constant- and variable size dimensions.
+* Constant- and variable rank tensors.
+* Broadcasting.
+* Conditional shapes.
+* Reuse of shape specifications, including in class inheritance.
+* Automatic rewrite of docstrings to include shape information.
+
+
+Installation
+++++++++++++
+
+``check_shapes`` can be installed with ``pip`` as usual::
+
+  pip install check_shapes
+
 
 Speed, and interactions with `tf.function`
 ++++++++++++++++++++++++++++++++++++++++++
@@ -452,10 +472,9 @@ This library has built-in support for checking the shapes of:
 
 * Python built-in scalars: ``bool``, ``int``, ``float`` and ``str``.
 * Python built-in sequences: ``tuple`` and ``list``.
-* NumPy ``ndarray``\\ s.
-* TensorFlow ``Tensor``\\ s and ``Variable``\\ s.
-* TensorFlow Probability ``DeferredTensor``\\ s, including ``TransformedVariable`` and
-  :class:`gpflow.Parameter`.
+* NumPy ``ndarray``\ s.
+* TensorFlow ``Tensor``\ s and ``Variable``\ s.
+* TensorFlow Probability ``DeferredTensor``\ s, including ``TransformedVariable``.
 
 
 Shapes of custom types

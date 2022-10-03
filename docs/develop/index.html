@@ -66,6 +66,25 @@
 
 </pre></div>
 </div>
+<p>Main features include:</p>
+<ul class="simple">
+<li><p>Supports NumPy and TensorFlow out-of-the-box, and easy to extend to other frameworks.</p></li>
+<li><p>Checking the shapes of function arguments and return types, using a decorator.</p></li>
+<li><p>Checking the shapes of local values, using a function.</p></li>
+<li><p>Constant- and variable size dimensions.</p></li>
+<li><p>Constant- and variable rank tensors.</p></li>
+<li><p>Broadcasting.</p></li>
+<li><p>Conditional shapes.</p></li>
+<li><p>Reuse of shape specifications, including in class inheritance.</p></li>
+<li><p>Automatic rewrite of docstrings to include shape information.</p></li>
+</ul>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">check_shapes</span></code> can be installed with <code class="docutils literal notranslate"><span class="pre">pip</span></code> as usual:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">check_shapes</span>
+</pre></div>
+</div>
+</section>
 <section id="speed-and-interactions-with-tf-function">
 <h2>Speed, and interactions with <cite>tf.function</cite><a class="headerlink" href="#speed-and-interactions-with-tf-function" title="Permalink to this heading">¶</a></h2>
 <p>Shape checking has some performance impact. Shape checking can be disabled to help alleviate this.
@@ -775,10 +794,9 @@ inherited from a super class.</p>
 <ul class="simple">
 <li><p>Python built-in scalars: <code class="docutils literal notranslate"><span class="pre">bool</span></code>, <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code> and <code class="docutils literal notranslate"><span class="pre">str</span></code>.</p></li>
 <li><p>Python built-in sequences: <code class="docutils literal notranslate"><span class="pre">tuple</span></code> and <code class="docutils literal notranslate"><span class="pre">list</span></code>.</p></li>
-<li><p>NumPy <code class="docutils literal notranslate"><span class="pre">ndarray</span></code>\ s.</p></li>
-<li><p>TensorFlow <code class="docutils literal notranslate"><span class="pre">Tensor</span></code>\ s and <code class="docutils literal notranslate"><span class="pre">Variable</span></code>\ s.</p></li>
-<li><p>TensorFlow Probability <code class="docutils literal notranslate"><span class="pre">DeferredTensor</span></code>\ s, including <code class="docutils literal notranslate"><span class="pre">TransformedVariable</span></code> and
-<code class="xref py py-class docutils literal notranslate"><span class="pre">gpflow.Parameter</span></code>.</p></li>
+<li><p>NumPy <code class="docutils literal notranslate"><span class="pre">ndarray</span></code>s.</p></li>
+<li><p>TensorFlow <code class="docutils literal notranslate"><span class="pre">Tensor</span></code>s and <code class="docutils literal notranslate"><span class="pre">Variable</span></code>s.</p></li>
+<li><p>TensorFlow Probability <code class="docutils literal notranslate"><span class="pre">DeferredTensor</span></code>s, including <code class="docutils literal notranslate"><span class="pre">TransformedVariable</span></code>.</p></li>
 </ul>
 <section id="shapes-of-custom-types">
 <h3>Shapes of custom types<a class="headerlink" href="#shapes-of-custom-types" title="Permalink to this heading">¶</a></h3>
