@@ -1,0 +1,91 @@
+[tool.poetry]
+name = "shape_checking_study"
+version = "0.1.0"
+description = ""
+authors = ["Jesper Nielsen <jesper@prowler.io>"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "artifactory"
+url = "https://artifactory.piointernal.prowler.io/artifactory/api/pypi/pypi-prod/simple"
+default = true
+
+[tool.poetry.dependencies]
+python = "^3.7"
+tensorflow = "~2.4.4"
+tensorflow-probability = "~0.12.0"
+jax = {extras = ["cpu"], version = "^0.2.26"}
+torch = "^1.10.1"
+sphinx = "^4.4.0"
+sphinx-rtd-theme = "^1.0.0"
+numpydoc = "^1.2"
+nbsphinx = "^0.8.8"
+sphinx-autodoc-typehints = "^1.16.0"
+pandoc = "^2.0.1"
+gpflow = {path = "/home/jesper/src/GPflow", develop = true}
+lark = "^1.1.1"
+
+[tool.poetry.dev-dependencies]
+black = "^20.0b0"
+isort = "^5.10.1"
+mypy = "^0.920"
+pylint = "^2.10.0"
+pytest = "^5.2"
+taskipy = "^1.9.0"
+
+[tool.black]
+line-length = 95
+target-version = ['py37']
+
+[tool.isort]
+profile = "black"
+line_length = 95
+
+[tool.taskipy.tasks]
+
+isort = "isort shape_checking_study tests"
+black = "black shape_checking_study tests"
+mypy = "mypy shape_checking_study tests"
+pylint = "pylint shape_checking_study tests"
+pytest = "pytest tests"
+numpy_example = "python -m shape_checking_study.numpy_example"
+tensorflow_example = "python -m shape_checking_study.tensorflow_example"
+jax_example = "python -m shape_checking_study.jax_example"
+pytorch_example = "python -m shape_checking_study.pytorch_example"
+
+format = """\
+  echo XXXXXXXXXXXXXXXXXXXXXXXXX isort XXXXXXXXXXXXXXXXXXXXXXXXX ; \
+  task isort ; \
+  echo XXXXXXXXXXXXXXXXXXXXXXXXX black XXXXXXXXXXXXXXXXXXXXXXXXX ; \
+  task black ; \
+"""
+
+lint = """\
+  echo XXXXXXXXXXXXXXXXXXXXXXXXX mypy XXXXXXXXXXXXXXXXXXXXXXXXX ; \
+  task mypy ;
+  echo XXXXXXXXXXXXXXXXXXXXXXXXX pylint XXXXXXXXXXXXXXXXXXXXXXXXX ; \
+  task pylint ; \
+"""
+
+benchmark = """\
+  task format ; \
+  task lint ; \
+  echo XXXXXXXXXXXXXXXXXXXXXXXXX numpy XXXXXXXXXXXXXXXXXXXXXXXXX ; \
+  task numpy_example ; \
+  echo XXXXXXXXXXXXXXXXXXXXXXXXX tensorflow XXXXXXXXXXXXXXXXXXXXXXXXX ; \
+  task tensorflow_example ; \
+  echo XXXXXXXXXXXXXXXXXXXXXXXXX jax XXXXXXXXXXXXXXXXXXXXXXXXX ; \
+  task jax_example ; \
+  echo XXXXXXXXXXXXXXXXXXXXXXXXX pytorch XXXXXXXXXXXXXXXXXXXXXXXXX ; \
+  task pytorch_example ; \
+"""
+
+test = """\
+  task format ; \
+  task lint ; \
+  echo XXXXXXXXXXXXXXXXXXXXXXXXX pytest XXXXXXXXXXXXXXXXXXXXXXXXX ; \
+  task pytest ; \
+"""
