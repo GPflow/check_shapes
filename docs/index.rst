@@ -12,6 +12,7 @@ A library for annotating and checking the shapes of tensors.
    :titlesonly:
 
    User Guide <self>
+   benchmarks
    API reference <autoapi/check_shapes/index>
 
 
@@ -49,7 +50,8 @@ Installation
 Speed, and interactions with `tf.function`
 ++++++++++++++++++++++++++++++++++++++++++
 
-Shape checking has some performance impact. Shape checking can be disabled to help alleviate this.
+Shape checking has some performance impact. For estimates of this impact see our :doc:`benchmarks`
+page. If the overhead is unacceptable shape checking can be disabled.
 Shape checking can be set to one of three different states:
 
 * ``ENABLED``. Shapes are checked wherever they can be.

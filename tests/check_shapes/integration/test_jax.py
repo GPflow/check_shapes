@@ -30,7 +30,6 @@ from ..utils import assert_has_shape
 
 try:
     import jax.numpy as jnp
-    import numpy as np
     from jax import grad, jit, random
 
     requires_jax = lambda f: f
@@ -123,7 +122,7 @@ def test_check_shapes() -> None:
                 return weights - LEARNING_RATE * loss_grads(weights)
 
             n_features = training_features.shape[-1]
-            weights = np.zeros((n_features,))
+            weights = jnp.zeros((n_features,))
 
             for _ in range(N_ITERATIONS):
                 weights = step(weights)

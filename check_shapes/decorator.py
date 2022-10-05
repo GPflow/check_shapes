@@ -50,7 +50,16 @@ class WrapperPostProcessor(ABC):
         signature: inspect.Signature,
         tf_decorator: bool = False,
     ) -> Callable[..., Any]:
-        ...
+        """
+        Called whenever ``check_shapes`` wraps a function.
+
+        :param func: Orginal function, before wrapping.
+        :param wrapped: The wrapper around ``func``, that implements the shape checking.
+        :param signature: The `Signature` of ``func``.
+        :param tf_decorator: Whether to apply custom TensorFlow decorator logic. Most users should
+            ignore this.
+        :return: ``wrapped`` or a new wrapper.
+        """
 
 
 _wrapper_post_processors = []

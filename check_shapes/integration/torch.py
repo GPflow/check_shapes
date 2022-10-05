@@ -19,17 +19,21 @@ from ..error_contexts import ErrorContext
 from ..shapes import register_get_shape
 
 
-def install_torch_integration() -> None:
+def install_torch_integration() -> bool:
     """
     Install various hooks to support PyTorch.
 
     If PyTorch is not installed in this environment this function does nothing.
+
+    :return: Whether PyTorch support hooks actually were installed.
     """
     try:
         import torch
     except ImportError:
-        return  # PyTorch not installed - don't install integrations.
+        return False  # PyTorch not installed - don't install integrations.
 
     @register_get_shape(torch.Tensor)
     def get_torch_shape(shaped: torch.Tensor, context: ErrorContext) -> Shape:
         return tuple(shaped.shape)
+
+    return True
