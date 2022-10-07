@@ -1,0 +1,18 @@
+:orphan:
+
+:py:mod:`check_shapes.integration.tf`
+=====================================
+
+.. py:module:: check_shapes.integration.tf
+
+
+Module Contents
+---------------
+
+.. py:function:: install_tf_integration()
+
+   Install various hooks to support TensorFlow.
+
+   If TensorFlow is not installed in this environment this function does nothing.
+
+

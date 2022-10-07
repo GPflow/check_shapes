@@ -1,0 +1,18 @@
+:orphan:
+
+:py:mod:`check_shapes.integration.torch`
+========================================
+
+.. py:module:: check_shapes.integration.torch
+
+
+Module Contents
+---------------
+
+.. py:function:: install_torch_integration()
+
+   Install various hooks to support PyTorch.
+
+   If PyTorch is not installed in this environment this function does nothing.
+
+

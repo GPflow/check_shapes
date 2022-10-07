@@ -12,6 +12,18 @@
 Module Contents
 ---------------
 
+.. py:class:: WrapperPostProcessor
+
+   Bases: :py:obj:`abc.ABC`
+
+   Hook for updating / modifying decorated / wrapped functions.
+
+
+.. py:function:: add_wrapper_post_processor(post_processor)
+
+   Add a hook for updating / modifying decorated / wrapped functions.
+
+
 .. py:function:: null_check_shapes(func)
 
    Annotates the given function so that it looks like it has shape checks, but without actually

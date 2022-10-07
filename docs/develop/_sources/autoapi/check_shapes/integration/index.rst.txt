@@ -1,0 +1,8 @@
+:orphan:
+
+:py:mod:`check_shapes.integration`
+==================================
+
+.. py:module:: check_shapes.integration
+
+

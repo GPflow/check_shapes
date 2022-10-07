@@ -51,24 +51,24 @@
 <p>The main entry point is <a class="reference internal" href="autoapi/check_shapes/index.html#module-check_shapes" title="check_shapes"><code class="xref py py-func docutils literal notranslate"><span class="pre">check_shapes()</span></code></a>.</p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">check_shapes</span> <span class="kn">import</span> <span class="n">check_shapes</span>
 
-<span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
 <span class="nd">@check_shapes</span><span class="p">(</span>
     <span class="s2">&quot;features: [batch..., n_features]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;weights: [n_features]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">linear_model</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">linear_model</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
 
 </pre></div>
 </div>
 <p>Main features include:</p>
 <ul class="simple">
-<li><p>Supports NumPy and TensorFlow out-of-the-box, and easy to extend to other frameworks.</p></li>
+<li><p>Supports NumPy, TensorFlow, JAX and PyTorch out-of-the-box, and easy to extend to other
+frameworks.</p></li>
 <li><p>Checking the shapes of function arguments and return types, using a decorator.</p></li>
 <li><p>Checking the shapes of local values, using a function.</p></li>
 <li><p>Constant- and variable size dimensions.</p></li>
@@ -169,15 +169,15 @@ ways:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Statistics</span><span class="p">:</span>
-    <span class="n">mean</span><span class="p">:</span> <span class="n">AnyNDArray</span>
-    <span class="n">std</span><span class="p">:</span> <span class="n">AnyNDArray</span>
+    <span class="n">mean</span><span class="p">:</span> <span class="n">ndarray</span>
+    <span class="n">std</span><span class="p">:</span> <span class="n">ndarray</span>
 
 <span class="nd">@check_shapes</span><span class="p">(</span>
     <span class="s2">&quot;data: [n_rows, n_columns]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return.mean: [n_columns]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return.std: [n_columns]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">compute_statistics</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Statistics</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">compute_statistics</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Statistics</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Statistics</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 
 </pre></div>
@@ -191,7 +191,7 @@ your function returns a tuple of values:</p>
     <span class="s2">&quot;return[0]: [n_columns]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return[1]: [n_columns]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">compute_mean_and_std</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">AnyNDArray</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">compute_mean_and_std</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]:</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 </pre></div>
@@ -203,7 +203,7 @@ your function returns a tuple of values:</p>
     <span class="s2">&quot;data[all]: [., n_columns]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [., n_columns]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">concat_rows</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">AnyNDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">concat_rows</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="n">concat_rows</span><span class="p">(</span>
@@ -241,7 +241,7 @@ your function returns a tuple of values:</p>
     <span class="s2">&quot;data.values(): [., n_columns]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [., n_columns]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">concat_rows</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AnyNDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">concat_rows</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="n">concat_rows</span><span class="p">(</span>
@@ -268,11 +268,11 @@ for optional values:</p>
     <span class="s2">&quot;return: [n_rows_1, n_rows_2]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="k">def</span> <span class="nf">squared_exponential_kernel</span><span class="p">(</span>
-    <span class="n">variance</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">x2</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AnyNDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+    <span class="n">variance</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">x2</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">x2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="n">x1</span>
-    <span class="n">cov</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">variance</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+    <span class="n">cov</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">variance</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
         <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x1</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x2</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">cov</span>
@@ -297,7 +297,7 @@ for optional values:</p>
     <span class="s2">&quot;v1: [2]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;v2: [2]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">vector_2d_distance</span><span class="p">(</span><span class="n">v1</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">v2</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">vector_2d_distance</span><span class="p">(</span><span class="n">v1</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">v2</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">v1</span> <span class="o">-</span> <span class="n">v2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
 
 </pre></div>
@@ -310,7 +310,7 @@ have the same size, though that size can be anything:</p>
     <span class="s2">&quot;v1: [d]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;v2: [d]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">vector_distance</span><span class="p">(</span><span class="n">v1</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">v2</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">vector_distance</span><span class="p">(</span><span class="n">v1</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">v2</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">v1</span> <span class="o">-</span> <span class="n">v2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
 
 </pre></div>
@@ -321,7 +321,7 @@ have the same size, though that size can be anything:</p>
 <span class="nd">@check_shapes</span><span class="p">(</span>
     <span class="s2">&quot;v: [None]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">vector_length</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">vector_length</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">v</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
 
 </pre></div>
@@ -331,7 +331,7 @@ have the same size, though that size can be anything:</p>
 <span class="nd">@check_shapes</span><span class="p">(</span>
     <span class="s2">&quot;v: [.]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">vector_length</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">vector_length</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">v</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
 
 </pre></div>
@@ -344,8 +344,8 @@ multiple uses of the same variable name must match the same dimension sizes:</p>
     <span class="s2">&quot;x: [*batch, n_columns]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [*batch]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">batch_mean</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
-    <span class="n">mean</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">batch_mean</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">mean</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mean</span>
 
 </pre></div>
@@ -356,8 +356,8 @@ multiple uses of the same variable name must match the same dimension sizes:</p>
     <span class="s2">&quot;x: [batch..., n_columns]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">batch_mean</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
-    <span class="n">mean</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">batch_mean</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">mean</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mean</span>
 
 </pre></div>
@@ -368,7 +368,7 @@ multiple uses of the same variable name must match the same dimension sizes:</p>
 <span class="nd">@check_shapes</span><span class="p">(</span>
     <span class="s2">&quot;x: [*]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">rank</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">rank</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
 </pre></div>
@@ -378,7 +378,7 @@ multiple uses of the same variable name must match the same dimension sizes:</p>
 <span class="nd">@check_shapes</span><span class="p">(</span>
     <span class="s2">&quot;x: [...]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">rank</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">rank</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
 </pre></div>
@@ -391,8 +391,8 @@ multiple uses of the same variable name must match the same dimension sizes:</p>
     <span class="s2">&quot;x: [...]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: []&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
-    <span class="n">mean</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+<span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">mean</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
     <span class="k">return</span> <span class="n">mean</span>
 
 </pre></div>
@@ -405,7 +405,7 @@ to the specification. For example:</p>
     <span class="s2">&quot;b: [broadcast batch...]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
 
 </pre></div>
@@ -433,7 +433,7 @@ the argument to a <code class="docutils literal notranslate"><span class="pre">b
     <span class="s2">&quot;b: [broadcast batch...] if check_b&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">check_a</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_b</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">check_a</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_b</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
 
 <span class="n">add</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span> <span class="n">check_b</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -451,10 +451,10 @@ only allow tests against <code class="docutils literal notranslate"><span class=
     <span class="s2">&quot;return: [n_a, n_a] if b is None&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [n_a, n_b] if b is not None&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">square</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AnyNDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">square</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">a</span>
-    <span class="n">result</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">a</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">a</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
     <span class="k">return</span> <span class="n">result</span>
 
 <span class="n">square</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,)))</span>
@@ -472,12 +472,12 @@ only allow tests against <code class="docutils literal notranslate"><span class=
     <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="k">def</span> <span class="nf">add</span><span class="p">(</span>
-    <span class="n">a</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span>
-    <span class="n">b</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span>
+    <span class="n">a</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">b</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
     <span class="n">check_all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">check_a</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_b</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
 
 <span class="n">add</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span> <span class="n">check_b</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -494,12 +494,12 @@ only allow tests against <code class="docutils literal notranslate"><span class=
     <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="k">def</span> <span class="nf">add</span><span class="p">(</span>
-    <span class="n">a</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span>
-    <span class="n">b</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span>
+    <span class="n">a</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">b</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
     <span class="n">enable_checks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_a</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_b</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
 
 <span class="n">add</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span> <span class="n">check_b</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -514,7 +514,7 @@ only allow tests against <code class="docutils literal notranslate"><span class=
     <span class="s2">&quot;b: [broadcast batch...] if not disable_checks&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">disable_checks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">disable_checks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
 
 <span class="n">add</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)))</span>
@@ -536,7 +536,7 @@ only allow tests against <code class="docutils literal notranslate"><span class=
     <span class="s2">&quot;return: [i, 1] if (not a_vector) and b_vector&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [i, k] if (not a_vector) and (not b_vector)&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">a_vector</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">b_vector</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">a_vector</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">b_vector</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">a_vector</span><span class="p">:</span>
         <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
     <span class="k">if</span> <span class="n">b_vector</span><span class="p">:</span>
@@ -568,8 +568,8 @@ places:</p>
     <span class="s2">&quot;weights: [n_features]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">linear_model</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
-    <span class="n">prediction</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">linear_model</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">prediction</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">prediction</span>
 
 </pre></div>
@@ -582,8 +582,8 @@ places:</p>
     <span class="s2">&quot;weights: [n_features] # linear_model currently only supports a single output.&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">linear_model</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
-    <span class="n">prediction</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">linear_model</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">prediction</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">prediction</span>
 
 </pre></div>
@@ -609,19 +609,19 @@ inherit shapes from overridden methods:</p>
         <span class="s2">&quot;features: [batch..., n_features]&quot;</span><span class="p">,</span>
         <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
         <span class="k">pass</span>
 
 <span class="k">class</span> <span class="nc">LinearModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
     <span class="nd">@check_shapes</span><span class="p">(</span>
         <span class="s2">&quot;weights: [n_features]&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="n">weights</span>
 
     <span class="nd">@inherit_check_shapes</span>
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
-        <span class="n">prediction</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">prediction</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">prediction</span>
 
 </pre></div>
@@ -640,11 +640,11 @@ functions are objects that can be stored:</p>
 <span class="p">)</span>
 
 <span class="nd">@check_metric_shapes</span>
-<span class="k">def</span> <span class="nf">rmse</span><span class="p">(</span><span class="n">actual</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">predicted</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">rmse</span><span class="p">(</span><span class="n">actual</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">predicted</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">predicted</span> <span class="o">-</span> <span class="n">actual</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))))</span>
 
 <span class="nd">@check_metric_shapes</span>
-<span class="k">def</span> <span class="nf">mape</span><span class="p">(</span><span class="n">actual</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">predicted</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">mape</span><span class="p">(</span><span class="n">actual</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">predicted</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">predicted</span> <span class="o">-</span> <span class="n">actual</span><span class="p">)</span> <span class="o">/</span> <span class="n">actual</span><span class="p">)))</span>
 
 </pre></div>
@@ -662,14 +662,14 @@ production implementation:</p>
         <span class="s2">&quot;features: [batch..., n_features]&quot;</span><span class="p">,</span>
         <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
         <span class="k">pass</span>
 
 <span class="nd">@check_shapes</span><span class="p">(</span>
     <span class="s2">&quot;test_features: [n_rows, n_features]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;test_labels: [n_rows]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">evaluate_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">test_features</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">test_labels</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">evaluate_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">test_features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">test_labels</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_features</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">prediction</span> <span class="o">-</span> <span class="n">test_labels</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))))</span>
 
@@ -679,7 +679,7 @@ production implementation:</p>
     <span class="n">fake_predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">10</span><span class="p">,))</span>
 
     <span class="nd">@get_check_shapes</span><span class="p">(</span><span class="n">Model</span><span class="o">.</span><span class="n">predict</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">fake_predict</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">fake_predict</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">features</span> <span class="ow">is</span> <span class="n">fake_features</span>
         <span class="k">return</span> <span class="n">fake_predictions</span>
 
@@ -703,13 +703,13 @@ and should only be called within functions that has such a decorator. For exampl
     <span class="s2">&quot;test_labels: [n_rows, n_labels]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: []&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="n">weights</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">test_features</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">test_labels</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
-    <span class="n">prediction</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">check_shape</span><span class="p">(</span><span class="n">test_features</span> <span class="o">@</span> <span class="n">weights</span><span class="p">,</span> <span class="s2">&quot;[n_rows, n_labels]&quot;</span><span class="p">)</span>
-    <span class="n">error</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">check_shape</span><span class="p">(</span><span class="n">prediction</span> <span class="o">-</span> <span class="n">test_labels</span><span class="p">,</span> <span class="s2">&quot;[n_rows, n_labels]&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="n">weights</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">test_features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">test_labels</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">prediction</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">check_shape</span><span class="p">(</span><span class="n">test_features</span> <span class="o">@</span> <span class="n">weights</span><span class="p">,</span> <span class="s2">&quot;[n_rows, n_labels]&quot;</span><span class="p">)</span>
+    <span class="n">error</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">check_shape</span><span class="p">(</span><span class="n">prediction</span> <span class="o">-</span> <span class="n">test_labels</span><span class="p">,</span> <span class="s2">&quot;[n_rows, n_labels]&quot;</span><span class="p">)</span>
     <span class="n">square_error</span> <span class="o">=</span> <span class="n">check_shape</span><span class="p">(</span><span class="n">error</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;[n_rows, n_labels]&quot;</span><span class="p">)</span>
     <span class="n">mean_square_error</span> <span class="o">=</span> <span class="n">check_shape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">square_error</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;[n_rows]&quot;</span><span class="p">)</span>
     <span class="n">root_mean_square_error</span> <span class="o">=</span> <span class="n">check_shape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mean_square_error</span><span class="p">),</span> <span class="s2">&quot;[n_rows]&quot;</span><span class="p">)</span>
-    <span class="n">loss</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">root_mean_square_error</span><span class="p">)</span>
+    <span class="n">loss</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">root_mean_square_error</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">loss</span>
 
 </pre></div>
@@ -721,11 +721,11 @@ and should only be called within functions that has such a decorator. For exampl
 use it without the decorator. In fact the decorator is just a wrapper around the class
 <code class="xref py py-class docutils literal notranslate"><span class="pre">ShapeChecker</span></code>, which can be used to check shapes directly:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
-<span class="k">def</span> <span class="nf">linear_model</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">linear_model</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
     <span class="n">checker</span> <span class="o">=</span> <span class="n">ShapeChecker</span><span class="p">()</span>
     <span class="n">checker</span><span class="o">.</span><span class="n">check_shape</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="s2">&quot;[batch..., n_features]&quot;</span><span class="p">)</span>
     <span class="n">checker</span><span class="o">.</span><span class="n">check_shape</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="s2">&quot;[n_features]&quot;</span><span class="p">)</span>
-    <span class="n">prediction</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">checker</span><span class="o">.</span><span class="n">check_shape</span><span class="p">(</span>
+    <span class="n">prediction</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">checker</span><span class="o">.</span><span class="n">check_shape</span><span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">),</span> <span class="s2">&quot;[batch...]&quot;</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">prediction</span>
@@ -750,7 +750,7 @@ inherited from a super class.</p>
     <span class="s2">&quot;weights: [n_features]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">linear_model</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">linear_model</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes a prediction from a linear model.</span>
 
@@ -758,7 +758,7 @@ inherited from a super class.</p>
 <span class="sd">    :param weights: Model weights.</span>
 <span class="sd">    :returns: Model predictions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">prediction</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+    <span class="n">prediction</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">prediction</span>
 
 </pre></div>
@@ -797,18 +797,22 @@ inherited from a super class.</p>
 <li><p>NumPy <code class="docutils literal notranslate"><span class="pre">ndarray</span></code>s.</p></li>
 <li><p>TensorFlow <code class="docutils literal notranslate"><span class="pre">Tensor</span></code>s and <code class="docutils literal notranslate"><span class="pre">Variable</span></code>s.</p></li>
 <li><p>TensorFlow Probability <code class="docutils literal notranslate"><span class="pre">DeferredTensor</span></code>s, including <code class="docutils literal notranslate"><span class="pre">TransformedVariable</span></code>.</p></li>
+<li><p>JAX <code class="docutils literal notranslate"><span class="pre">ndarray</span></code>s.</p></li>
+<li><p>PyTorch <code class="docutils literal notranslate"><span class="pre">Tensor</span></code>s.</p></li>
 </ul>
 <section id="shapes-of-custom-types">
 <h3>Shapes of custom types<a class="headerlink" href="#shapes-of-custom-types" title="Permalink to this heading">¶</a></h3>
 <p><a class="reference internal" href="autoapi/check_shapes/index.html#module-check_shapes" title="check_shapes"><code class="xref py py-mod docutils literal notranslate"><span class="pre">check_shapes</span></code></a> uses the function <code class="xref py py-func docutils literal notranslate"><span class="pre">get_shape()</span></code> to extract the shape of an object.
-You can use <code class="xref py py-func docutils literal notranslate"><span class="pre">register_get_shape()</span></code> to extend <code class="xref py py-func docutils literal notranslate"><span class="pre">get_shape()</span></code> to extract shapes for you own
-custom types:</p>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">get_shape()</span></code> will try to read a property of the object with name <code class="docutils literal notranslate"><span class="pre">shape</span></code>, which should have
+type <code class="docutils literal notranslate"><span class="pre">Optional[Tuple[Optional[int],</span> <span class="pre">...]]</span></code>. If you have a custom type that does not have such a
+property you can use <code class="xref py py-func docutils literal notranslate"><span class="pre">register_get_shape()</span></code> to extend <code class="xref py py-func docutils literal notranslate"><span class="pre">get_shape()</span></code> to extract the shape of
+your type:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
 <span class="k">class</span> <span class="nc">LinearModel</span><span class="p">:</span>
     <span class="nd">@check_shapes</span><span class="p">(</span>
         <span class="s2">&quot;weights: [n_features]&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="n">weights</span>
 
     <span class="nd">@check_shapes</span><span class="p">(</span>
@@ -816,8 +820,8 @@ custom types:</p>
         <span class="s2">&quot;features: [batch..., n_features]&quot;</span><span class="p">,</span>
         <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyNDArray</span><span class="p">:</span>
-        <span class="n">prediction</span><span class="p">:</span> <span class="n">AnyNDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">prediction</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">prediction</span>
 
 <span class="nd">@register_get_shape</span><span class="p">(</span><span class="n">LinearModel</span><span class="p">)</span>
@@ -831,7 +835,7 @@ custom types:</p>
     <span class="s2">&quot;test_labels: [n_rows]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: []&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">LinearModel</span><span class="p">,</span> <span class="n">test_features</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">,</span> <span class="n">test_labels</span><span class="p">:</span> <span class="n">AnyNDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">LinearModel</span><span class="p">,</span> <span class="n">test_features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">test_labels</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_features</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">prediction</span> <span class="o">-</span> <span class="n">test_labels</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))))</span>
 
@@ -897,7 +901,7 @@ custom types:</p>
       &copy;2022, The GPflow Contributors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.2.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.2.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -41,6 +41,27 @@
 <p>Decorator for checking the shapes of function using tf Tensors.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="check_shapes.decorator.WrapperPostProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">check_shapes.decorator.</span></span><span class="sig-name descname"><span class="pre">WrapperPostProcessor</span></span><a class="headerlink" href="#check_shapes.decorator.WrapperPostProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Hook for updating / modifying decorated / wrapped functions.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="check_shapes.decorator.add_wrapper_post_processor">
+<span class="sig-prename descclassname"><span class="pre">check_shapes.decorator.</span></span><span class="sig-name descname"><span class="pre">add_wrapper_post_processor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_processor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#check_shapes.decorator.add_wrapper_post_processor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a hook for updating / modifying decorated / wrapped functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>post_processor</strong> (<a class="reference internal" href="#check_shapes.decorator.WrapperPostProcessor" title="check_shapes.decorator.WrapperPostProcessor"><em>WrapperPostProcessor</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="check_shapes.decorator.null_check_shapes">
 <span class="sig-prename descclassname"><span class="pre">check_shapes.decorator.</span></span><span class="sig-name descname"><span class="pre">null_check_shapes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#check_shapes.decorator.null_check_shapes" title="Permalink to this definition">¶</a></dt>
@@ -63,18 +84,17 @@ checking anything.</p>
 <dd><p>Decorator that checks the shapes of tensor arguments.</p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">check_shapes</span> <span class="kn">import</span> <span class="n">check_shapes</span>
 
-<span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
 <span class="nd">@check_shapes</span><span class="p">(</span>
     <span class="s2">&quot;features: [batch..., n_features]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;weights: [n_features]&quot;</span><span class="p">,</span>
     <span class="s2">&quot;return: [batch...]&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span> <span class="nf">linear_model</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">linear_model</span><span class="p">(</span><span class="n">features</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,i -&gt; ...&quot;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
 
 </pre></div>
 </div>
@@ -156,7 +176,7 @@ but create some other problems, particularly related to branching on tensors.</p
       &copy;2022, The GPflow Contributors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.2.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.2.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
