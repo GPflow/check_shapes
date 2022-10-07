@@ -483,7 +483,7 @@ tests = ["pytest", "pytest-cov", "pytest-pep8"]
 name = "packaging"
 version = "21.3"
 description = "Core utilities for Python packages"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -602,7 +602,7 @@ toml = ">=0.7.1"
 name = "pyparsing"
 version = "3.0.9"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.8"
 
@@ -1050,7 +1050,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "3.7.*"
-content-hash = "17f1e6db573b17adc237ad3596f7474385b2263de6841562283202322919adfe"
+content-hash = "cee3dcc3bb06a69ba786cc91925d97f63beaccb273abfff8e059d1ab036ddabb"
 
 [metadata.files]
 absl-py = [
