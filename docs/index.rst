@@ -26,7 +26,8 @@ Example:
 
 Main features include:
 
-* Supports NumPy and TensorFlow out-of-the-box, and easy to extend to other frameworks.
+* Supports NumPy, TensorFlow, JAX and PyTorch out-of-the-box, and easy to extend to other
+  frameworks.
 * Checking the shapes of function arguments and return types, using a decorator.
 * Checking the shapes of local values, using a function.
 * Constant- and variable size dimensions.
@@ -475,14 +476,18 @@ This library has built-in support for checking the shapes of:
 * NumPy ``ndarray``\ s.
 * TensorFlow ``Tensor``\ s and ``Variable``\ s.
 * TensorFlow Probability ``DeferredTensor``\ s, including ``TransformedVariable``.
+* JAX ``ndarray``\ s.
+* PyTorch ``Tensor``\ s.
 
 
 Shapes of custom types
 ----------------------
 
 :mod:`check_shapes` uses the function :func:`get_shape` to extract the shape of an object.
-You can use :func:`register_get_shape` to extend :func:`get_shape` to extract shapes for you own
-custom types:
+:func:`get_shape` will try to read a property of the object with name ``shape``, which should have
+type ``Optional[Tuple[Optional[int], ...]]``. If you have a custom type that does not have such a
+property you can use :func:`register_get_shape` to extend :func:`get_shape` to extract the shape of
+your type:
 
 .. literalinclude:: /examples/test_check_shapes_examples.py
    :start-after: [custom_type]

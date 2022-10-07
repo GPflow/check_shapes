@@ -17,9 +17,9 @@ Utilities for testing the `check_shapes` library.
 import inspect
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
-from check_shapes import Dimension, Shape, register_get_shape
+from check_shapes import Dimension, Shape, get_shape, register_get_shape
 from check_shapes.argument_ref import (
     AllElementsRef,
     ArgumentRef,
@@ -210,3 +210,15 @@ def current_line() -> int:
     """
     stack = inspect.stack()
     return stack[1].lineno
+
+
+def assert_has_shape(shaped: Any, expected_shape: Shape) -> None:
+    actual_shape = get_shape(shaped, TestContext())
+
+    # Frameworks like Numpy and tensorflow sometimes like to pretend that objects have another type
+    # than they actually do. Make sure the result actually has the right types:
+    if actual_shape is not None:
+        assert tuple == type(actual_shape)
+        assert all((actual_dim is None) or (int == type(actual_dim)) for actual_dim in actual_shape)
+
+    assert expected_shape == actual_shape

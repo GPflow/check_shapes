@@ -15,10 +15,9 @@
 Decorator for checking the shapes of function using tf Tensors.
 """
 import inspect
+from abc import ABC, abstractmethod
 from functools import update_wrapper
 from typing import Any, Callable, Sequence, cast
-
-import tensorflow as tf
 
 from .accessors import set_check_shapes
 from .argument_ref import RESULT_TOKEN
@@ -36,6 +35,32 @@ from .error_contexts import (
 )
 from .parser import parse_and_rewrite_docstring, parse_function_spec
 from .specs import ParsedArgumentSpec
+
+
+class WrapperPostProcessor(ABC):
+    """
+    Hook for updating / modifying decorated / wrapped functions.
+    """
+
+    @abstractmethod
+    def on_wrap(
+        self,
+        func: Callable[..., Any],
+        wrapped: Callable[..., Any],
+        signature: inspect.Signature,
+        tf_decorator: bool = False,
+    ) -> Callable[..., Any]:
+        ...
+
+
+_wrapper_post_processors = []
+
+
+def add_wrapper_post_processor(post_processor: WrapperPostProcessor) -> None:
+    """
+    Add a hook for updating / modifying decorated / wrapped functions.
+    """
+    _wrapper_post_processors.append(post_processor)
 
 
 def null_check_shapes(func: C) -> C:
@@ -155,19 +180,9 @@ def check_shapes(*specs: str, tf_decorator: bool = False) -> Callable[[C], C]:
 
             return result
 
-        # Work-around for TensorFlow saved_model expecting methods to have a `self` argument:
-        if "self" in signature.parameters:
-
-            def wrapped_method(self: Any, *args: Any, **kwargs: Any) -> Any:
-                return wrapped_function(self, *args, **kwargs)
-
-            wrapped = wrapped_method
-        else:
-            wrapped = wrapped_function
-
-        # Make TensorFlow understand our decoration:
-        if tf_decorator:
-            tf.compat.v1.flags.tf_decorator.make_decorator(func, wrapped)
+        wrapped = wrapped_function
+        for post_processor in _wrapper_post_processors:
+            wrapped = post_processor.on_wrap(func, wrapped, signature, tf_decorator)
 
         update_wrapper(wrapped, func)
         set_check_shapes(wrapped, _check_shapes)
