@@ -15,4 +15,6 @@ Module Contents
 
    If PyTorch is not installed in this environment this function does nothing.
 
+   :return: Whether PyTorch support hooks actually were installed.
+
 

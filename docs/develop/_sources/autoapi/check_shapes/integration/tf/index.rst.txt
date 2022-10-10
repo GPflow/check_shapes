@@ -15,4 +15,6 @@ Module Contents
 
    If TensorFlow is not installed in this environment this function does nothing.
 
+   :return: Whether TensorFlow support hooks actually were installed.
+
 

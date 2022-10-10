@@ -18,6 +18,19 @@ Module Contents
 
    Hook for updating / modifying decorated / wrapped functions.
 
+   .. py:method:: on_wrap(func, wrapped, signature, tf_decorator = False)
+      :abstractmethod:
+
+      Called whenever ``check_shapes`` wraps a function.
+
+      :param func: Orginal function, before wrapping.
+      :param wrapped: The wrapper around ``func``, that implements the shape checking.
+      :param signature: The `Signature` of ``func``.
+      :param tf_decorator: Whether to apply custom TensorFlow decorator logic. Most users should
+          ignore this.
+      :return: ``wrapped`` or a new wrapper.
+
+
 
 .. py:function:: add_wrapper_post_processor(post_processor)
 

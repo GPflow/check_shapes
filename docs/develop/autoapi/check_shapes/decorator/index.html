@@ -46,6 +46,29 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">check_shapes.decorator.</span></span><span class="sig-name descname"><span class="pre">WrapperPostProcessor</span></span><a class="headerlink" href="#check_shapes.decorator.WrapperPostProcessor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Hook for updating / modifying decorated / wrapped functions.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="check_shapes.decorator.WrapperPostProcessor.on_wrap">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">on_wrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrapped</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_decorator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#check_shapes.decorator.WrapperPostProcessor.on_wrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called whenever <code class="docutils literal notranslate"><span class="pre">check_shapes</span></code> wraps a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> (<em>Callable</em><em>[</em><em>Ellipsis</em><em>, </em><em>Any</em><em>]</em>) – Orginal function, before wrapping.</p></li>
+<li><p><strong>wrapped</strong> (<em>Callable</em><em>[</em><em>Ellipsis</em><em>, </em><em>Any</em><em>]</em>) – The wrapper around <code class="docutils literal notranslate"><span class="pre">func</span></code>, that implements the shape checking.</p></li>
+<li><p><strong>signature</strong> (<em>inspect.Signature</em>) – The <cite>Signature</cite> of <code class="docutils literal notranslate"><span class="pre">func</span></code>.</p></li>
+<li><p><strong>tf_decorator</strong> (<em>bool</em>) – Whether to apply custom TensorFlow decorator logic. Most users should
+ignore this.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">wrapped</span></code> or a new wrapper.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Callable[Ellipsis, Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
@@ -136,6 +159,7 @@ but create some other problems, particularly related to branching on tensors.</p
 <h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmarks.html">Benchmark results</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">API reference</a></li>
 </ul>
 
