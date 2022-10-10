@@ -1,0 +1,20 @@
+:orphan:
+
+:py:mod:`check_shapes.integration.tfp`
+======================================
+
+.. py:module:: check_shapes.integration.tfp
+
+
+Module Contents
+---------------
+
+.. py:function:: install_tfp_integration()
+
+   Install various hooks to support TensorFlow-Probability.
+
+   If TensorFlow-Probability is not installed in this environment this function does nothing.
+
+   :return: Whether TensorFlow-Probability support hooks actually were installed.
+
+
