@@ -36,16 +36,21 @@ python = ">=3.7,<3.11"
 packaging = ">=18.0.0"
 
 [tool.poetry.dev-dependencies]
+Sphinx = "^5.2.2"
 black = "20.8b1"  # Pinned for backwards compatibility with the old stuff.
 click = "<8.1.0"  # Required by `black = "20.8b1"`.
 isort = "^5.10.0"
-mypy = ">0.920,<0.982"
+matplotlib = "^3.0.0"
+mypy = ">0.920,!=0.982"
+numpy = "<1.22.0"  # MyPy is unhappy about Python 3.7 and newer versions of NumPy.
+# Pandas constrained to reduce Poetry search-time. Feel free to loosen this when we no longer need
+# to support Python 3.7:
+pandas = ">=1.1.0,<1.4.0"
 pylint = "^2.10.0"
 pytest = "^6.0.0"
+sphinx-autoapi = "^2.0.0"
 taskipy = "^1.10.0"
 tomlkit = "^0.11.4"
-Sphinx = "^5.2.2"
-sphinx-autoapi = "^2.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -75,7 +80,10 @@ module = [
     "_pytest.*",
     "importlib_metadata.*",
     "jax.*",
+    "matplotlib.*",
     "numpy.*",  # Newer version of numpy does have stubs. We can get rid of this in the future.
+    "pandas.*",
+    "pkg_resources.*",
     "pytest.*",
     "tensorflow.*",
     "tensorflow_probability.*",
@@ -98,27 +106,27 @@ docs_check = """
 
 isort = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX isort XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    isort poetryenv check_shapes tests
+    isort poetryenv check_shapes tests benchmark
 """
 isort_check = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX isort XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    isort --check-only poetryenv check_shapes tests
+    isort --check-only poetryenv check_shapes tests benchmark
 """
 black = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX black XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    black poetryenv check_shapes tests
+    black poetryenv check_shapes tests benchmark
 """
 black_check = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX black XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    black --check poetryenv check_shapes tests
+    black --check poetryenv check_shapes tests benchmark
 """
 mypy = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX mypy XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    mypy poetryenv check_shapes tests
+    mypy poetryenv check_shapes tests benchmark
 """
 pylint = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX pylint XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    pylint poetryenv check_shapes tests
+    pylint poetryenv check_shapes tests benchmark
 """
 pytest = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX pytest XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

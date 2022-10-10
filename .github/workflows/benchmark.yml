@@ -1,0 +1,56 @@
+name: benchmark
+
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    # 10:17 every Monday - A compromise between random and a convenient time:
+    - cron: '17 10 * * 1'
+
+env:
+  penv: './poetryenv poetryenvs'
+  run: 'run python benchmark'
+  bex: 'benchmark/examples'
+  res: 'gh-pages/benchmark_results'
+  plots: 'gh-pages/docs/benchmark_plots/'
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          path: gh-pages
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          pip install -r poetryenv_requirements.txt
+          ${penv}/np_max install
+          ${penv}/tf_max install
+          ${penv}/jax_max install
+          ${penv}/torch_max install
+      - name: Run benchmarks
+        run: |
+          ${penv}/np_max ${run}/run_benchmark.py ${bex}/np_example.py ${res}
+          ${penv}/tf_max ${run}/run_benchmark.py ${bex}/tf_example.py ${res}
+          ${penv}/tf_max ${run}/run_benchmark.py ${bex}/tf_example.py --modifiers=no_compile ${res}
+          ${penv}/jax_max ${run}/run_benchmark.py ${bex}/jax_example.py ${res}
+          ${penv}/jax_max ${run}/run_benchmark.py ${bex}/jax_example.py --modifiers=no_jit ${res}
+          ${penv}/torch_max ${run}/run_benchmark.py ${bex}/torch_example.py ${res}
+      - name: Plot benchmarks
+        run: |
+          ${penv}/np_max ${run}/plot_benchmarks.py ${res}
+          mkdir -p ${plots}
+          mv ${res}/overhead.png ${plots}
+      - name: Commit new benchmark results
+        run: |
+          cd gh-pages
+          git add benchmark_results docs/benchmark_plots
+          git config --global user.email "none"
+          git config --global user.name "github-actions-bot"
+          git commit -m "Run benchmarks."
+          git push

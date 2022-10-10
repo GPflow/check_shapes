@@ -24,16 +24,18 @@ from ..error_contexts import ErrorContext
 from ..shapes import register_get_shape
 
 
-def install_tf_integration() -> None:
+def install_tf_integration() -> bool:
     """
     Install various hooks to support TensorFlow.
 
     If TensorFlow is not installed in this environment this function does nothing.
+
+    :return: Whether TensorFlow support hooks actually were installed.
     """
     try:
         import tensorflow as tf
     except ImportError:
-        return  # TensorFlow not installed - don't install integrations.
+        return False  # TensorFlow not installed - don't install integrations.
 
     ########################################
     # Support for getting shapes of tf types
@@ -82,3 +84,5 @@ def install_tf_integration() -> None:
             return wrapped
 
     add_wrapper_post_processor(TfWrapperPostProcessor())
+
+    return True
