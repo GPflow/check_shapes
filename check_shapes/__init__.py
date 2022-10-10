@@ -33,10 +33,12 @@ from .decorator import check_shapes
 from .error_contexts import ErrorContext
 from .inheritance import inherit_check_shapes
 from .integration.tf import install_tf_integration
+from .integration.tfp import install_tfp_integration
 from .integration.torch import install_torch_integration
 from .shapes import get_shape, register_get_shape
 
 install_tf_integration()
+install_tfp_integration()
 install_torch_integration()
 
 __version__ = "0.1.0"

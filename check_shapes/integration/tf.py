@@ -39,23 +39,13 @@ def install_tf_integration() -> None:
     # Support for getting shapes of tf types
     ########################################
 
-    tf_types = [tf.Tensor, tf.Variable]
-
-    try:
-        import tensorflow_probability as tfp
-
-        tf_types.append(tfp.util.DeferredTensor)
-    except ImportError:
-        pass  # TensorFlow probability not installed - that's ok.
-
+    @register_get_shape(tf.Tensor)
+    @register_get_shape(tf.Variable)
     def get_tensorflow_shape(shaped: Any, context: ErrorContext) -> Shape:
         shape = shaped.shape
         if not shape:
             return None
         return tuple(shape)
-
-    for tf_type in tf_types:
-        register_get_shape(tf_type)(get_tensorflow_shape)
 
     ################################################
     # Support for ShapeCheckingState.EAGER_MODE_ONLY
