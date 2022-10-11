@@ -33,7 +33,6 @@ classifiers = [
 [tool.poetry.dependencies]
 lark = "^1.1.0"
 python = ">=3.7,<3.11"
-packaging = ">=18.0.0"
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^5.2.2"

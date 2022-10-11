@@ -16,8 +16,6 @@
 
 from typing import Any
 
-from packaging.version import Version
-
 from ..base_types import Shape
 from ..error_contexts import ErrorContext
 from ..shapes import register_get_shape
@@ -32,6 +30,7 @@ def install_tfp_integration() -> bool:
     :return: Whether TensorFlow-Probability support hooks actually were installed.
     """
     try:
+        import tensorflow as tf
         import tensorflow_probability as tfp
     except ImportError:
         return False  # TensorFlow-Probability not installed - don't install integrations.
@@ -45,19 +44,18 @@ def install_tfp_integration() -> bool:
 
     # pylint: disable=protected-access  # To access the _TensorCoercible
 
-    if Version(tfp.__version__) < Version("0.14.0"):
-        register_get_shape(
-            tfp.python.layers.internal.distribution_tensor_coercible._TensorCoercible
-        )(get_tensorflow_shape)
-    else:
-
-        @register_get_shape(
-            tfp.python.layers.internal.distribution_tensor_coercible._TensorCoercible
-        )
-        def get_tensor_coercible_shape(shaped: Any, context: ErrorContext) -> Shape:
-            shape = shaped.shape()
+    @register_get_shape(tfp.python.layers.internal.distribution_tensor_coercible._TensorCoercible)
+    def get_tensor_coercible_shape(shaped: Any, context: ErrorContext) -> Shape:
+        # This one is unpleasant. Sometimes the `shape` is a `TensorShape`, but sometimes it's a
+        # function that returns a `TensorShape`. The version of TensorFlow probability seems to have
+        # something to do with it, but it also seems to be more complicated...
+        shape = shaped.shape
+        if not shape:
+            return None
+        if not isinstance(shape, tf.TensorShape):
+            shape = shape()
             if not shape:
                 return None
-            return tuple(shape)
+        return tuple(shape)
 
     return True

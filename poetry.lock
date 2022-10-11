@@ -354,7 +354,7 @@ python-versions = ">=3.7,<3.11"
 name = "packaging"
 version = "21.3"
 description = "Core utilities for Python packages"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -479,7 +479,7 @@ testutil = ["gitpython (>3)"]
 name = "pyparsing"
 version = "3.0.9"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6.8"
 
@@ -814,7 +814,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "flake8 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<3.11"
-content-hash = "0c5ba119a3b7c4ed84f128d4f1cd7c85e1ef20a14b50c761d3a830538a98ce3f"
+content-hash = "fbf52a0c006aeddcdc91487133de02d74ee0899fc96c085b5848bbf9a92d2f41"
 
 [metadata.files]
 alabaster = [
