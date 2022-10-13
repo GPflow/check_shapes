@@ -1,0 +1,189 @@
+#!/usr/bin/env python3
+# Copyright 2022 The GPflow Contributors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""
+Tool for running Poetry with different environments.
+
+An environment is defined by a directory containing a file called `pyproject_overrides.toml`.
+This script will replace values in `pyproject.toml` with any values found in
+`pyproject_overrides.toml`, and manage the resulting `poetry.lock` files and virtual environments.
+
+Usage::
+
+    ./poetryenv <my_environment> <my_poetry_command>
+
+Some concrete examples::
+
+    ./poetryenv poetryenvs/tf_min/ update
+    ./poetryenv poetryenvs/tf_min/ run task test
+
+You can use the `-r` flag to recursively find all environments and execute the same command::
+
+    ./poetryenv -r poetryenvs update
+    ./poetryenv -r poetryenvs run task test
+"""
+import argparse
+import subprocess
+import sys
+from contextlib import ExitStack, contextmanager
+from pathlib import Path
+from typing import Iterator, List
+
+import tomlkit
+
+_ROOT_DIR = Path(__file__).parent
+_BACKUP_DIR = _ROOT_DIR / "poetryenv_backup"
+_PYPROJECT_TOML = _ROOT_DIR / "pyproject.toml"
+_BACKUP_PYPROJECT_TOML = _BACKUP_DIR / _PYPROJECT_TOML.name
+_POETRY_LOCK = _ROOT_DIR / "poetry.lock"
+_VENV_DIR = _ROOT_DIR / ".venv"
+
+
+@contextmanager
+def _backup_dir() -> Iterator[None]:
+    _BACKUP_DIR.mkdir()
+    try:
+        yield
+    finally:
+        _BACKUP_DIR.rmdir()
+
+
+@contextmanager
+def _shuffle(root: Path, env_dir: Path, derived: bool) -> Iterator[None]:
+    """
+    Shuffles files between the root dir, backup dir and environment dir.
+
+    1: Move the root file to the backup dir.
+    2: Move the corresponding file from the environment dir to the root.
+    3: Yield to allow processing of the environment file.
+    4: Move the environment file back to the environment dir.
+    5: Move the root file back to the root dir.
+
+    `derived` indicates whether the file is something Poetry produces.
+    If `derived` is `True` the files are allowed to be missing (Poetry might not have produced them
+    yet). Otherwise the files must exist.
+    If `derived` is `False` the file is not moved to- / from the backup directory, but is assumed to
+    be produced in another way.
+    """
+    backup_path = _BACKUP_DIR / root.name
+    env_path = env_dir / root.name
+
+    if derived:
+        if root.exists():
+            root.rename(backup_path)
+        if env_path.exists():
+            env_path.rename(root)
+    else:
+        root.rename(backup_path)
+
+    try:
+        yield
+    finally:
+        if derived:
+            if root.exists():
+                root.replace(env_path)
+            if backup_path.exists():
+                backup_path.replace(root)
+        else:
+            backup_path.replace(root)
+
+
+def _read_toml(path: Path) -> tomlkit.TOMLDocument:
+    with open(path, "rt", encoding="utf-8") as f:
+        return tomlkit.load(f)
+
+
+def _write_toml(data: tomlkit.TOMLDocument, path: Path) -> None:
+    with open(path, "wt", encoding="utf-8") as f:
+        tomlkit.dump(data, f)
+
+
+def _override_toml(root: tomlkit.TOMLDocument, overrides: tomlkit.TOMLDocument) -> None:
+    for key, override_value in overrides.items():
+        if (key in root) and (hasattr(root[key], "items")):
+            _override_toml(root[key], override_value)
+        else:
+            root[key] = override_value
+
+
+def _update_pyproject_toml(overrides_path: Path) -> None:
+    pyproject = _read_toml(_BACKUP_PYPROJECT_TOML)
+    overrides = _read_toml(overrides_path)
+    _override_toml(pyproject, overrides)
+    _write_toml(pyproject, _PYPROJECT_TOML)
+
+
+def _find_envs(root: Path) -> List[Path]:
+    assert root.is_dir()
+    result = []
+    if (root / "pyproject_overrides.toml").exists():
+        result.append(root)
+    for child in root.iterdir():
+        if child.is_dir():
+            result.extend(_find_envs(child))
+    return result
+
+
+def poetryenv(root_env_dir: Path, recursive: bool, poetry_args: List[str]) -> int:
+    assert _PYPROJECT_TOML.is_file()
+    assert root_env_dir.is_dir()
+
+    env_dirs = _find_envs(root_env_dir) if recursive else [root_env_dir]
+
+    for env_dir in env_dirs:
+        if recursive:
+            print("Using environment:", env_dir)
+        with ExitStack() as stack:
+            stack.enter_context(_backup_dir())
+            stack.enter_context(_shuffle(_PYPROJECT_TOML, env_dir, derived=False))
+            stack.enter_context(_shuffle(_POETRY_LOCK, env_dir, derived=True))
+            stack.enter_context(_shuffle(_VENV_DIR, env_dir, derived=True))
+
+            env_pyproject_overrides_toml = env_dir / "pyproject_overrides.toml"
+            _update_pyproject_toml(env_pyproject_overrides_toml)
+
+            command = " ".join(["poetry"] + poetry_args)
+            returncode = subprocess.run(command, shell=True, check=False).returncode
+        if returncode != 0:
+            if recursive:
+                print("Stopping due to error from environment:", env_dir)
+            return returncode
+    return 0
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Run poetry under alternative environments")
+    parser.add_argument(
+        "env_dir",
+        type=Path,
+        help="Directory containing the environment to use.",
+    )
+    parser.add_argument(
+        "--recursive",
+        "-r",
+        action="store_true",
+        help="If set env_dir is searched recursively"
+        " and poetry is executed for envirenments found.",
+    )
+    parser.add_argument(
+        "poetry_args",
+        nargs=argparse.REMAINDER,
+        help="Command to pass to poetry.",
+    )
+    args = parser.parse_args()
+    sys.exit(poetryenv(args.env_dir, args.recursive, args.poetry_args))
+
+
+if __name__ == "__main__":
+    main()

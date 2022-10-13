@@ -11,46 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# type: ignore[no-any-return]
 """
 Code examples used in `check_shapes` docstrings.
 """
-
-
-def test_example__basic() -> None:
-    # This test / example is placed *above* the imports, to ensure that the example has the
-    # necessary imports.
-
-    # pylint: disable=import-outside-toplevel, redefined-outer-name, reimported
-
-    # [basic]
-
-    import tensorflow as tf
-
-    from check_shapes import check_shapes
-
-    @tf.function
-    @check_shapes(
-        "features: [batch..., n_features]",
-        "weights: [n_features]",
-        "return: [batch...]",
-    )
-    def linear_model(features: tf.Tensor, weights: tf.Tensor) -> tf.Tensor:
-        return tf.einsum("...i,i -> ...", features, weights)
-
-    # [basic]
-
-    w = tf.ones((3,))
-    for batch_shape in [(), (2,), (2, 4)]:
-        f = tf.ones(batch_shape + (3,))
-        linear_model(f, w)
-
-
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Iterable, Mapping, Optional, Sequence, Tuple
+from typing import Any, Iterable, Mapping, Optional, Sequence, Tuple
 from unittest.mock import MagicMock
 
-import numpy as np
 import pytest
 
 from check_shapes import (
@@ -73,9 +43,49 @@ from check_shapes import (
     set_enable_function_call_precompute,
     set_rewrite_docstrings,
 )
-from check_shapes.base_types import AnyNDArray
+
+# Some versions of NumPy has generic ndarrays while other don't:
+ndarray = Any
+
+try:
+    import numpy as np
+
+    requires_np = lambda f: f
+except ImportError:
+    from unittest.mock import MagicMock
+
+    np = MagicMock()
+
+    requires_np = pytest.mark.skip("NumPy not installed.")
 
 
+@requires_np
+def test_example__basic() -> None:
+    # pylint: disable=import-outside-toplevel, redefined-outer-name, reimported
+
+    # [basic]
+
+    import numpy as np
+
+    from check_shapes import check_shapes
+
+    @check_shapes(
+        "features: [batch..., n_features]",
+        "weights: [n_features]",
+        "return: [batch...]",
+    )
+    def linear_model(features: ndarray, weights: ndarray) -> ndarray:
+        return np.einsum("...i,i -> ...", features, weights)
+
+    # [basic]
+
+    w = np.ones((3,))
+    for batch_shape in [(), (2,), (2, 4)]:
+        f = np.ones(batch_shape + (3,))
+        linear_model(f, w)
+
+
+@requires_np
 def test_example__disable__manual() -> None:
     old_value = get_enable_check_shapes()
 
@@ -91,6 +101,7 @@ def test_example__disable__manual() -> None:
         set_enable_check_shapes(old_value)
 
 
+@requires_np
 def test_example__disable__context_manager() -> None:
     def performance_sensitive_function() -> None:
         pass
@@ -103,6 +114,7 @@ def test_example__disable__context_manager() -> None:
     # [disable__context_manager]
 
 
+@requires_np
 def test_example__pytest_fixture() -> None:
     # pylint: disable=unused-variable
     # [pytest_fixture]
@@ -123,20 +135,21 @@ def test_example__pytest_fixture() -> None:
     # [pytest_fixture]
 
 
+@requires_np
 def test_example__argument_ref_attribute() -> None:
     # [argument_ref_attribute]
 
     @dataclass
     class Statistics:
-        mean: AnyNDArray
-        std: AnyNDArray
+        mean: ndarray
+        std: ndarray
 
     @check_shapes(
         "data: [n_rows, n_columns]",
         "return.mean: [n_columns]",
         "return.std: [n_columns]",
     )
-    def compute_statistics(data: AnyNDArray) -> Statistics:
+    def compute_statistics(data: ndarray) -> Statistics:
         return Statistics(np.mean(data, axis=0), np.std(data, axis=0))
 
     # [argument_ref_attribute]
@@ -144,6 +157,7 @@ def test_example__argument_ref_attribute() -> None:
     compute_statistics(np.ones((4, 3)))
 
 
+@requires_np
 def test_example__argument_ref_index() -> None:
     # [argument_ref_index]
 
@@ -152,7 +166,7 @@ def test_example__argument_ref_index() -> None:
         "return[0]: [n_columns]",
         "return[1]: [n_columns]",
     )
-    def compute_mean_and_std(data: AnyNDArray) -> Tuple[AnyNDArray, AnyNDArray]:
+    def compute_mean_and_std(data: ndarray) -> Tuple[ndarray, ndarray]:
         return np.mean(data, axis=0), np.std(data, axis=0)
 
     # [argument_ref_index]
@@ -160,6 +174,7 @@ def test_example__argument_ref_index() -> None:
     compute_mean_and_std(np.ones((4, 3)))
 
 
+@requires_np
 def test_example__argument_ref_all() -> None:
     # [argument_ref_all]
 
@@ -167,7 +182,7 @@ def test_example__argument_ref_all() -> None:
         "data[all]: [., n_columns]",
         "return: [., n_columns]",
     )
-    def concat_rows(data: Sequence[AnyNDArray]) -> AnyNDArray:
+    def concat_rows(data: Sequence[ndarray]) -> ndarray:
         return np.concatenate(data, axis=0)
 
     concat_rows(
@@ -180,6 +195,7 @@ def test_example__argument_ref_all() -> None:
     # [argument_ref_all]
 
 
+@requires_np
 def test_example__argument_ref_keys() -> None:
     # [argument_ref_keys]
 
@@ -200,6 +216,7 @@ def test_example__argument_ref_keys() -> None:
     # [argument_ref_keys]
 
 
+@requires_np
 def test_example__argument_ref_values() -> None:
     # [argument_ref_values]
 
@@ -207,7 +224,7 @@ def test_example__argument_ref_values() -> None:
         "data.values(): [., n_columns]",
         "return: [., n_columns]",
     )
-    def concat_rows(data: Mapping[str, AnyNDArray]) -> AnyNDArray:
+    def concat_rows(data: Mapping[str, ndarray]) -> ndarray:
         return np.concatenate(list(data.values()), axis=0)
 
     concat_rows(
@@ -220,6 +237,7 @@ def test_example__argument_ref_values() -> None:
     # [argument_ref_values]
 
 
+@requires_np
 def test_example__argument_ref_optional() -> None:
     # [argument_ref_optional]
 
@@ -229,11 +247,11 @@ def test_example__argument_ref_optional() -> None:
         "return: [n_rows_1, n_rows_2]",
     )
     def squared_exponential_kernel(
-        variance: float, x1: AnyNDArray, x2: Optional[AnyNDArray] = None
-    ) -> AnyNDArray:
+        variance: float, x1: ndarray, x2: Optional[ndarray] = None
+    ) -> ndarray:
         if x2 is None:
             x2 = x1
-        cov: AnyNDArray = variance * np.exp(
+        cov: ndarray = variance * np.exp(
             -0.5 * np.sum((x1[:, None, :] - x2[None, :, :]) ** 2, axis=2)
         )
         return cov
@@ -244,6 +262,7 @@ def test_example__argument_ref_optional() -> None:
     # [argument_ref_optional]
 
 
+@requires_np
 def test_example__dimension_spec_constant() -> None:
     # [dimension_spec_constant]
 
@@ -251,7 +270,7 @@ def test_example__dimension_spec_constant() -> None:
         "v1: [2]",
         "v2: [2]",
     )
-    def vector_2d_distance(v1: AnyNDArray, v2: AnyNDArray) -> float:
+    def vector_2d_distance(v1: ndarray, v2: ndarray) -> float:
         return float(np.sqrt(np.sum((v1 - v2) ** 2)))
 
     # [dimension_spec_constant]
@@ -259,6 +278,7 @@ def test_example__dimension_spec_constant() -> None:
     vector_2d_distance(np.ones((2,)), np.ones((2,)))
 
 
+@requires_np
 def test_example__dimension_spec_variable() -> None:
     # [dimension_spec_variable]
 
@@ -266,7 +286,7 @@ def test_example__dimension_spec_variable() -> None:
         "v1: [d]",
         "v2: [d]",
     )
-    def vector_distance(v1: AnyNDArray, v2: AnyNDArray) -> float:
+    def vector_distance(v1: ndarray, v2: ndarray) -> float:
         return float(np.sqrt(np.sum((v1 - v2) ** 2)))
 
     # [dimension_spec_variable]
@@ -274,13 +294,14 @@ def test_example__dimension_spec_variable() -> None:
     vector_distance(np.ones((3,)), np.ones((3,)))
 
 
+@requires_np
 def test_example__dimension_spec_anonymous__dot() -> None:
     # [dimension_spec_anonymous__dot]
 
     @check_shapes(
         "v: [.]",
     )
-    def vector_length(v: AnyNDArray) -> float:
+    def vector_length(v: ndarray) -> float:
         return float(np.sqrt(np.sum(v ** 2)))
 
     # [dimension_spec_anonymous__dot]
@@ -288,13 +309,14 @@ def test_example__dimension_spec_anonymous__dot() -> None:
     vector_length(np.ones((3,)))
 
 
+@requires_np
 def test_example__dimension_spec_anonymous__none() -> None:
     # [dimension_spec_anonymous__none]
 
     @check_shapes(
         "v: [None]",
     )
-    def vector_length(v: AnyNDArray) -> float:
+    def vector_length(v: ndarray) -> float:
         return float(np.sqrt(np.sum(v ** 2)))
 
     # [dimension_spec_anonymous__none]
@@ -302,6 +324,7 @@ def test_example__dimension_spec_anonymous__none() -> None:
     vector_length(np.ones((3,)))
 
 
+@requires_np
 def test_example__dimension_spec_variable_rank__star() -> None:
     # [dimension_spec_variable_rank__star]
 
@@ -309,8 +332,8 @@ def test_example__dimension_spec_variable_rank__star() -> None:
         "x: [*batch, n_columns]",
         "return: [*batch]",
     )
-    def batch_mean(x: AnyNDArray) -> AnyNDArray:
-        mean: AnyNDArray = np.mean(x, axis=-1)
+    def batch_mean(x: ndarray) -> ndarray:
+        mean: ndarray = np.mean(x, axis=-1)
         return mean
 
     # [dimension_spec_variable_rank__star]
@@ -320,6 +343,7 @@ def test_example__dimension_spec_variable_rank__star() -> None:
         batch_mean(x)
 
 
+@requires_np
 def test_example__dimension_spec_variable_rank__ellipsis() -> None:
     # [dimension_spec_variable_rank__ellipsis]
 
@@ -327,8 +351,8 @@ def test_example__dimension_spec_variable_rank__ellipsis() -> None:
         "x: [batch..., n_columns]",
         "return: [batch...]",
     )
-    def batch_mean(x: AnyNDArray) -> AnyNDArray:
-        mean: AnyNDArray = np.mean(x, axis=-1)
+    def batch_mean(x: ndarray) -> ndarray:
+        mean: ndarray = np.mean(x, axis=-1)
         return mean
 
     # [dimension_spec_variable_rank__ellipsis]
@@ -338,13 +362,14 @@ def test_example__dimension_spec_variable_rank__ellipsis() -> None:
         batch_mean(x)
 
 
+@requires_np
 def test_example__dimension_spec_anonymous_variable_rank__star() -> None:
     # [dimension_spec_anonymous_variable_rank__star]
 
     @check_shapes(
         "x: [*]",
     )
-    def rank(x: AnyNDArray) -> int:
+    def rank(x: ndarray) -> int:
         return len(x.shape)
 
     # [dimension_spec_anonymous_variable_rank__star]
@@ -354,13 +379,14 @@ def test_example__dimension_spec_anonymous_variable_rank__star() -> None:
         rank(x)
 
 
+@requires_np
 def test_example__dimension_spec_anonymous_variable_rank__ellipsis() -> None:
     # [dimension_spec_anonymous_variable_rank__ellipsis]
 
     @check_shapes(
         "x: [...]",
     )
-    def rank(x: AnyNDArray) -> int:
+    def rank(x: ndarray) -> int:
         return len(x.shape)
 
     # [dimension_spec_anonymous_variable_rank__ellipsis]
@@ -370,6 +396,7 @@ def test_example__dimension_spec_anonymous_variable_rank__ellipsis() -> None:
         rank(x)
 
 
+@requires_np
 def test_example__dimension_spec__scalar() -> None:
     # [dimension_spec__scalar]
 
@@ -377,8 +404,8 @@ def test_example__dimension_spec__scalar() -> None:
         "x: [...]",
         "return: []",
     )
-    def mean(x: AnyNDArray) -> AnyNDArray:
-        mean: AnyNDArray = np.sum(x) / x.size
+    def mean(x: ndarray) -> ndarray:
+        mean: ndarray = np.sum(x) / x.size
         return mean
 
     # [dimension_spec__scalar]
@@ -388,6 +415,7 @@ def test_example__dimension_spec__scalar() -> None:
         mean(x)
 
 
+@requires_np
 def test_example__dimension_spec_broadcast() -> None:
 
     # [dimension_spec_broadcast]
@@ -397,7 +425,7 @@ def test_example__dimension_spec_broadcast() -> None:
         "b: [broadcast batch...]",
         "return: [batch...]",
     )
-    def add(a: AnyNDArray, b: AnyNDArray) -> AnyNDArray:
+    def add(a: ndarray, b: ndarray) -> ndarray:
         return a + b
 
     # [dimension_spec_broadcast]
@@ -405,6 +433,7 @@ def test_example__dimension_spec_broadcast() -> None:
     add(np.ones((3, 1)), np.ones((1, 4)))
 
 
+@requires_np
 def test_example__bool_spec_argument_ref() -> None:
     # pylint: disable=unused-argument
 
@@ -415,7 +444,7 @@ def test_example__bool_spec_argument_ref() -> None:
         "b: [broadcast batch...] if check_b",
         "return: [batch...]",
     )
-    def add(a: AnyNDArray, b: AnyNDArray, check_a: bool = True, check_b: bool = True) -> AnyNDArray:
+    def add(a: ndarray, b: ndarray, check_a: bool = True, check_b: bool = True) -> ndarray:
         return a + b
 
     add(np.ones((3, 1)), np.ones((1, 4)), check_b=False)
@@ -423,6 +452,7 @@ def test_example__bool_spec_argument_ref() -> None:
     # [bool_spec_argument_ref]
 
 
+@requires_np
 def test_example__bool_spec_argument_ref_is_none() -> None:
     # pylint: disable=unused-argument
 
@@ -434,10 +464,10 @@ def test_example__bool_spec_argument_ref_is_none() -> None:
         "return: [n_a, n_a] if b is None",
         "return: [n_a, n_b] if b is not None",
     )
-    def square(a: AnyNDArray, b: Optional[AnyNDArray] = None) -> AnyNDArray:
+    def square(a: ndarray, b: Optional[ndarray] = None) -> ndarray:
         if b is None:
             b = a
-        result: AnyNDArray = a[:, None] * b[None, :]
+        result: ndarray = a[:, None] * b[None, :]
         return result
 
     square(np.ones((3,)))
@@ -446,6 +476,7 @@ def test_example__bool_spec_argument_ref_is_none() -> None:
     # [bool_spec_argument_ref_is_none]
 
 
+@requires_np
 def test_example__bool_spec_or() -> None:
     # pylint: disable=unused-argument
 
@@ -457,12 +488,12 @@ def test_example__bool_spec_or() -> None:
         "return: [batch...]",
     )
     def add(
-        a: AnyNDArray,
-        b: AnyNDArray,
+        a: ndarray,
+        b: ndarray,
         check_all: bool = False,
         check_a: bool = True,
         check_b: bool = True,
-    ) -> AnyNDArray:
+    ) -> ndarray:
         return a + b
 
     add(np.ones((3, 1)), np.ones((1, 4)), check_b=False)
@@ -470,6 +501,7 @@ def test_example__bool_spec_or() -> None:
     # [bool_spec_or]
 
 
+@requires_np
 def test_example__bool_spec_and() -> None:
     # pylint: disable=unused-argument
 
@@ -481,12 +513,12 @@ def test_example__bool_spec_and() -> None:
         "return: [batch...]",
     )
     def add(
-        a: AnyNDArray,
-        b: AnyNDArray,
+        a: ndarray,
+        b: ndarray,
         enable_checks: bool = True,
         check_a: bool = True,
         check_b: bool = True,
-    ) -> AnyNDArray:
+    ) -> ndarray:
         return a + b
 
     add(np.ones((3, 1)), np.ones((1, 4)), check_b=False)
@@ -494,6 +526,7 @@ def test_example__bool_spec_and() -> None:
     # [bool_spec_and]
 
 
+@requires_np
 def test_example__bool_spec_not() -> None:
     # pylint: disable=unused-argument
 
@@ -504,7 +537,7 @@ def test_example__bool_spec_not() -> None:
         "b: [broadcast batch...] if not disable_checks",
         "return: [batch...]",
     )
-    def add(a: AnyNDArray, b: AnyNDArray, disable_checks: bool = False) -> AnyNDArray:
+    def add(a: ndarray, b: ndarray, disable_checks: bool = False) -> ndarray:
         return a + b
 
     add(np.ones((3, 1)), np.ones((1, 4)))
@@ -512,6 +545,7 @@ def test_example__bool_spec_not() -> None:
     # [bool_spec_not]
 
 
+@requires_np
 def test_example__bool_spec__composition() -> None:
     # pylint: disable=unused-argument
 
@@ -527,7 +561,7 @@ def test_example__bool_spec__composition() -> None:
         "return: [i, 1] if (not a_vector) and b_vector",
         "return: [i, k] if (not a_vector) and (not b_vector)",
     )
-    def multiply(a: AnyNDArray, b: AnyNDArray, a_vector: bool, b_vector: bool) -> AnyNDArray:
+    def multiply(a: ndarray, b: ndarray, a_vector: bool, b_vector: bool) -> ndarray:
         if a_vector:
             a = a[None, :]
         if b_vector:
@@ -544,6 +578,7 @@ def test_example__bool_spec__composition() -> None:
     multiply(np.ones((3, 4)), np.ones((4, 5)), a_vector=False, b_vector=False)
 
 
+@requires_np
 def test_example__note_spec__global() -> None:
     # [note_spec__global]
 
@@ -553,8 +588,8 @@ def test_example__note_spec__global() -> None:
         "weights: [n_features]",
         "return: [batch...]",
     )
-    def linear_model(features: AnyNDArray, weights: AnyNDArray) -> AnyNDArray:
-        prediction: AnyNDArray = np.einsum("...i,i -> ...", features, weights)
+    def linear_model(features: ndarray, weights: ndarray) -> ndarray:
+        prediction: ndarray = np.einsum("...i,i -> ...", features, weights)
         return prediction
 
     # [note_spec__global]
@@ -562,6 +597,7 @@ def test_example__note_spec__global() -> None:
     linear_model(np.ones((4, 3)), np.ones((3,)))
 
 
+@requires_np
 def test_example__note_spec__local() -> None:
     # [note_spec__local]
 
@@ -570,8 +606,8 @@ def test_example__note_spec__local() -> None:
         "weights: [n_features] # linear_model currently only supports a single output.",
         "return: [batch...]",
     )
-    def linear_model(features: AnyNDArray, weights: AnyNDArray) -> AnyNDArray:
-        prediction: AnyNDArray = np.einsum("...i,i -> ...", features, weights)
+    def linear_model(features: ndarray, weights: ndarray) -> ndarray:
+        prediction: ndarray = np.einsum("...i,i -> ...", features, weights)
         return prediction
 
     # [note_spec__local]
@@ -579,6 +615,7 @@ def test_example__note_spec__local() -> None:
     linear_model(np.ones((4, 3)), np.ones((3,)))
 
 
+@requires_np
 def test_example__reuse__inherit_check_shapes() -> None:
     # [reuse__inherit_check_shapes]
 
@@ -588,19 +625,19 @@ def test_example__reuse__inherit_check_shapes() -> None:
             "features: [batch..., n_features]",
             "return: [batch...]",
         )
-        def predict(self, features: AnyNDArray) -> AnyNDArray:
+        def predict(self, features: ndarray) -> ndarray:
             pass
 
     class LinearModel(Model):
         @check_shapes(
             "weights: [n_features]",
         )
-        def __init__(self, weights: AnyNDArray) -> None:
+        def __init__(self, weights: ndarray) -> None:
             self._weights = weights
 
         @inherit_check_shapes
-        def predict(self, features: AnyNDArray) -> AnyNDArray:
-            prediction: AnyNDArray = np.einsum("...i,i -> ...", features, self._weights)
+        def predict(self, features: ndarray) -> ndarray:
+            prediction: ndarray = np.einsum("...i,i -> ...", features, self._weights)
             return prediction
 
     # [reuse__inherit_check_shapes]
@@ -609,6 +646,7 @@ def test_example__reuse__inherit_check_shapes() -> None:
     model.predict(np.ones((10, 3)))
 
 
+@requires_np
 def test_example__reuse__functional() -> None:
     # [reuse__functional]
 
@@ -619,11 +657,11 @@ def test_example__reuse__functional() -> None:
     )
 
     @check_metric_shapes
-    def rmse(actual: AnyNDArray, predicted: AnyNDArray) -> float:
+    def rmse(actual: ndarray, predicted: ndarray) -> float:
         return float(np.mean(np.sqrt(np.mean((predicted - actual) ** 2, axis=-1))))
 
     @check_metric_shapes
-    def mape(actual: AnyNDArray, predicted: AnyNDArray) -> float:
+    def mape(actual: ndarray, predicted: ndarray) -> float:
         return float(np.mean(np.abs((predicted - actual) / actual)))
 
     # [reuse__functional]
@@ -634,6 +672,7 @@ def test_example__reuse__functional() -> None:
     mape(actual, predicted)
 
 
+@requires_np
 def test_example__reuse__get_check_shapes() -> None:
     # [reuse__get_check_shapes]
 
@@ -643,14 +682,14 @@ def test_example__reuse__get_check_shapes() -> None:
             "features: [batch..., n_features]",
             "return: [batch...]",
         )
-        def predict(self, features: AnyNDArray) -> AnyNDArray:
+        def predict(self, features: ndarray) -> ndarray:
             pass
 
     @check_shapes(
         "test_features: [n_rows, n_features]",
         "test_labels: [n_rows]",
     )
-    def evaluate_model(model: Model, test_features: AnyNDArray, test_labels: AnyNDArray) -> float:
+    def evaluate_model(model: Model, test_features: ndarray, test_labels: ndarray) -> float:
         prediction = model.predict(test_features)
         return float(np.mean(np.sqrt(np.mean((prediction - test_labels) ** 2, axis=-1))))
 
@@ -660,7 +699,7 @@ def test_example__reuse__get_check_shapes() -> None:
         fake_predictions = np.ones((10,))
 
         @get_check_shapes(Model.predict)
-        def fake_predict(features: AnyNDArray) -> AnyNDArray:
+        def fake_predict(features: ndarray) -> ndarray:
             assert features is fake_features
             return fake_predictions
 
@@ -673,6 +712,7 @@ def test_example__reuse__get_check_shapes() -> None:
     test_evaluate_model()
 
 
+@requires_np
 def test_example__intermediate_results() -> None:
     # [intermediate_results]
 
@@ -682,13 +722,13 @@ def test_example__intermediate_results() -> None:
         "test_labels: [n_rows, n_labels]",
         "return: []",
     )
-    def loss(weights: AnyNDArray, test_features: AnyNDArray, test_labels: AnyNDArray) -> AnyNDArray:
-        prediction = check_shape(test_features @ weights, "[n_rows, n_labels]")
-        error: AnyNDArray = check_shape(prediction - test_labels, "[n_rows, n_labels]")
+    def loss(weights: ndarray, test_features: ndarray, test_labels: ndarray) -> ndarray:
+        prediction: ndarray = check_shape(test_features @ weights, "[n_rows, n_labels]")
+        error: ndarray = check_shape(prediction - test_labels, "[n_rows, n_labels]")
         square_error = check_shape(error ** 2, "[n_rows, n_labels]")
         mean_square_error = check_shape(np.mean(square_error, axis=-1), "[n_rows]")
         root_mean_square_error = check_shape(np.sqrt(mean_square_error), "[n_rows]")
-        loss: AnyNDArray = np.mean(root_mean_square_error)
+        loss: ndarray = np.mean(root_mean_square_error)
         return loss
 
     # [intermediate_results]
@@ -700,14 +740,15 @@ def test_example__intermediate_results() -> None:
     )
 
 
+@requires_np
 def test_example__shape_checker__raw() -> None:
     # [shape_checker__raw]
 
-    def linear_model(features: AnyNDArray, weights: AnyNDArray) -> AnyNDArray:
+    def linear_model(features: ndarray, weights: ndarray) -> ndarray:
         checker = ShapeChecker()
         checker.check_shape(features, "[batch..., n_features]")
         checker.check_shape(weights, "[n_features]")
-        prediction: AnyNDArray = checker.check_shape(
+        prediction: ndarray = checker.check_shape(
             np.einsum("...i,i -> ...", features, weights), "[batch...]"
         )
         return prediction
@@ -717,6 +758,7 @@ def test_example__shape_checker__raw() -> None:
     linear_model(np.ones((4, 3)), np.ones((3,)))
 
 
+@requires_np
 def test_example__disable_function_call_precompute() -> None:
     def buggy_function() -> None:
         pass
@@ -737,6 +779,7 @@ def test_example__disable_function_call_precompute() -> None:
         set_enable_function_call_precompute(old_value)
 
 
+@requires_np
 def test_example__doc_rewrite() -> None:
 
     # [doc_rewrite__definition]
@@ -746,7 +789,7 @@ def test_example__doc_rewrite() -> None:
         "weights: [n_features]",
         "return: [batch...]",
     )
-    def linear_model(features: AnyNDArray, weights: AnyNDArray) -> AnyNDArray:
+    def linear_model(features: ndarray, weights: ndarray) -> ndarray:
         """
         Computes a prediction from a linear model.
 
@@ -754,7 +797,7 @@ def test_example__doc_rewrite() -> None:
         :param weights: Model weights.
         :returns: Model predictions.
         """
-        prediction: AnyNDArray = np.einsum("...i,i -> ...", features, weights)
+        prediction: ndarray = np.einsum("...i,i -> ...", features, weights)
         return prediction
 
     # [doc_rewrite__definition]
@@ -783,6 +826,7 @@ def test_example__doc_rewrite() -> None:
     assert expected_doc == linear_model.__doc__
 
 
+@requires_np
 def test_example__doc_rewrite__disable() -> None:
 
     old_rewrite_docstrings = get_rewrite_docstrings()
@@ -795,6 +839,7 @@ def test_example__doc_rewrite__disable() -> None:
         set_rewrite_docstrings(old_rewrite_docstrings)
 
 
+@requires_np
 def test_example__custom_type() -> None:
     # pylint: disable=protected-access,unused_variable
 
@@ -804,7 +849,7 @@ def test_example__custom_type() -> None:
         @check_shapes(
             "weights: [n_features]",
         )
-        def __init__(self, weights: AnyNDArray) -> None:
+        def __init__(self, weights: ndarray) -> None:
             self._weights = weights
 
         @check_shapes(
@@ -812,8 +857,8 @@ def test_example__custom_type() -> None:
             "features: [batch..., n_features]",
             "return: [batch...]",
         )
-        def predict(self, features: AnyNDArray) -> AnyNDArray:
-            prediction: AnyNDArray = np.einsum("...i,i -> ...", features, self._weights)
+        def predict(self, features: ndarray) -> ndarray:
+            prediction: ndarray = np.einsum("...i,i -> ...", features, self._weights)
             return prediction
 
     @register_get_shape(LinearModel)
@@ -827,7 +872,7 @@ def test_example__custom_type() -> None:
         "test_labels: [n_rows]",
         "return: []",
     )
-    def loss(model: LinearModel, test_features: AnyNDArray, test_labels: AnyNDArray) -> float:
+    def loss(model: LinearModel, test_features: ndarray, test_labels: ndarray) -> float:
         prediction = model.predict(test_features)
         return float(np.mean(np.sqrt(np.mean((prediction - test_labels) ** 2, axis=-1))))
 

@@ -1,0 +1,90 @@
+name: build_test_deploy
+
+on:
+  push:
+    branches-ignore:
+      - gh-pages
+  release:
+    types: [published]
+
+jobs:
+  test-base:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: poetry install
+      - run: poetry run task test
+
+  test-versions:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        framework: ["py", "np", "tf", "tfp", "jax", "torch"]
+        version: ["min", "max"]
+        include:
+          - version: "min"
+            python: "3.7"
+          - version: "max"
+            python: "3.10"
+
+    name: test-${{ matrix.framework }}-${{ matrix.version }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -r poetryenv_requirements.txt
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: ./poetryenv poetryenvs/${{ matrix.framework }}_${{ matrix.version }} install
+      - run: ./poetryenv poetryenvs/${{ matrix.framework }}_${{ matrix.version }} run task test
+
+  all-tests:
+    needs: [test-base, test-versions]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ok
+
+  docs:
+    needs: all-tests
+    if: contains(fromJson('["refs/heads/main", "refs/heads/develop"]'), github.ref)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          path: gh-pages
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: poetry install
+      - run: poetry run task docs
+      - name: Commit new documentation
+        run: |
+          branch=$(git symbolic-ref --short HEAD)
+          rm -rf gh-pages/docs/${branch}
+          mv docs_build gh-pages/docs/${branch}
+          cd gh-pages
+          git add docs
+          git config --global user.email "none"
+          git config --global user.name "github-actions-bot"
+          git commit -m "Build documentation."
+          git push
+
+  deploy:
+    needs: all-tests
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: poetry build
+      - run: poetry publish -u __token__ -p ${{ secrets.CHECK_SHAPES_PYPI_TOKEN }}

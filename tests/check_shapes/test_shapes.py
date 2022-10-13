@@ -13,15 +13,12 @@
 # limitations under the License.
 from typing import Any
 
-import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 from check_shapes import Shape, get_shape
 from check_shapes.exceptions import NoShapeError
 
-from .utils import TestContext
+from .utils import TestContext, assert_has_shape
 
 
 @pytest.mark.parametrize(
@@ -35,29 +32,10 @@ from .utils import TestContext
         ((0,), (1,)),
         ([[0.1, 0.2]], (1, 2)),
         ([[[], []]], None),
-        (np.zeros(()), ()),
-        (np.zeros((3, 4)), (3, 4)),
-        (tf.zeros(()), ()),
-        (tf.zeros((4, 3)), (4, 3)),
-        (tf.Variable(np.zeros(())), ()),
-        (tf.Variable(np.zeros((2, 4))), (2, 4)),
-        # pylint: disable=unexpected-keyword-arg
-        (tf.Variable(np.zeros((2, 4)), shape=[2, None]), (2, None)),
-        (tf.Variable(np.zeros((2, 4)), shape=tf.TensorShape(None)), None),
-        (tfp.util.TransformedVariable(3.0, tfp.bijectors.Exp()), ()),
-        (tfp.util.TransformedVariable(np.zeros((4, 2)), tfp.bijectors.Exp()), (4, 2)),
     ],
 )
 def test_get_shape(shaped: Any, expected_shape: Shape) -> None:
-    actual_shape = get_shape(shaped, TestContext())
-
-    # Numpy and tensorflow sometimes like to pretend that objects have another type than they
-    # actually do. Make sure the result actually has the right types:
-    if actual_shape is not None:
-        assert tuple == type(actual_shape)
-        assert all((actual_dim is None) or (int == type(actual_dim)) for actual_dim in actual_shape)
-
-    assert expected_shape == actual_shape
+    assert_has_shape(shaped, expected_shape)
 
 
 @pytest.mark.parametrize(

@@ -49,3 +49,5 @@ To check you installation run our tests:
 ```bash
 poetry run task test
 ```
+
+For testing with different versions of Python and dependencies, see the `poetryenv` script.

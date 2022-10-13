@@ -11,15 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-Code for printing flags for mypy, depending on library versions.
-"""
-from .type_flags import compute_mypy_flags
+from pathlib import Path
+
+import tomlkit
+
+import check_shapes
+
+_PYPROJECT_PATH = Path(__file__).parent.parent.parent / "pyproject.toml"
 
 
-def print_mypy_flags() -> None:
-    print(compute_mypy_flags())
+def test_version() -> None:
+    with open(_PYPROJECT_PATH, "rt", encoding="utf-8") as f:
+        pyproject = tomlkit.load(f)
 
+    pyproject_version = pyproject["tool"]["poetry"]["version"]  # type: ignore[index]
 
-if __name__ == "__main__":
-    print_mypy_flags()
+    assert pyproject_version == check_shapes.__version__

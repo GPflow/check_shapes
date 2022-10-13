@@ -263,7 +263,8 @@ class ShapeChecker:
 
         :param shaped: The object whose shape to check.
         :param tensor_spec: Specification to check the tensor against.
-            Usually this is a ``str`` in the format described in `Shape specification`_.
+            Usually this is a ``str`` in the format described under "Shape specification" in our
+            User Guide.
             Alternatively this can be a pre-parsed :class:`ParsedTensorSpec`, or an actual
             :class:`Shape`.
         :param context: Information about where ``shaped`` is coming from, for improved error
@@ -294,9 +295,9 @@ class ShapeChecker:
 
         :param checks: Checks to perform. The elements can either be ``(shaped, tensor_spec)`` or
             ``(shaped, tensor_spec, context)`` tuples. Where: ``shaped`` is the tensor whose shape
-            to check; ``tensor_spec`` is the specification to check it against (see `Shape
-            specification`_); and ``context`` contains (optional) information about where ``shaped``
-            came from - for better error messages.
+            to check; ``tensor_spec`` is the specification to check it against (see "Shape
+            specification" in our User Guide); and ``context`` contains (optional) information about
+            where ``shaped`` came from - for better error messages.
         """
         if not get_enable_check_shapes():
             return

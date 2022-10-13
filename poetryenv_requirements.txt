@@ -1,0 +1,3 @@
+# Requirements needed by poetryenv
+# We need to define these outside pyproject.toml, or we get a chicken-and-egg problem.
+tomlkit
