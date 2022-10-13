@@ -33,7 +33,7 @@ This release contains contributions from:
 <INSERT>, <NAME>, <HERE>, <USING>, <GITHUB>, <HANDLE>
 
 
-# Release 0.2.0 (next upcoming release in progress)
+# Release 0.3.0 (next upcoming release in progress)
 
 <INSERT SMALL BLURB ABOUT RELEASE FOCUS AREA AND POTENTIAL TOOLCHAIN CHANGES>
 
@@ -50,16 +50,40 @@ This release contains contributions from:
 
 ## Major Features and Improvements
 
+* <INSERT MAJOR FEATURE HERE, USING MARKDOWN SYNTAX>
+* <IF RELEASE CONTAINS MULTIPLE FEATURES FROM SAME AREA, GROUP THEM TOGETHER>
+
+## Bug Fixes and Other Changes
+
+* <SIMILAR TO ABOVE SECTION, BUT FOR OTHER IMPORTANT CHANGES / BUG FIXES>
+* <IF A CHANGE CLOSES A GITHUB ISSUE, IT SHOULD BE DOCUMENTED HERE>
+* <NOTES SHOULD BE GROUPED PER AREA>
+
+## Thanks to our Contributors
+
+This release contains contributions from:
+
+<INSERT>, <NAME>, <HERE>, <USING>, <GITHUB>, <HANDLE>
+
+
+# Release 0.2.0
+
+This release makes `check_shapes` independent of the underlying framework.
+
+## Major Features and Improvements
+
 * Made `check_shapes` independent of tensor framework:
   - Made NumPy optional.
   - Made TensorFlow optional.
   - Made TensorFlow-Probability optional.
   - Added support for JAX.
   - Added support for PyTorch.
+* Added benchmarks and documentation of overhead imposed by `check_shapes`.
 
 ## Bug Fixes and Other Changes
 
 * Fixed bug related to `tf.saved_model` and methods wrapped in `@check_shapes`.
+* Added support for TensorFlow-Probability `_TensorCoercible` objects.
 
 ## Thanks to our Contributors
 
