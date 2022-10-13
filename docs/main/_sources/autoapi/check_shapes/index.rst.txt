@@ -26,10 +26,8 @@ Submodules
    error_contexts/index.rst
    exceptions/index.rst
    inheritance/index.rst
-   mypy_flags/index.rst
    shapes/index.rst
    specs/index.rst
-   type_flags/index.rst
 
 
 Package Contents

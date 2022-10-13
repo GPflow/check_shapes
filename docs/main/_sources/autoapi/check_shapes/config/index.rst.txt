@@ -12,6 +12,13 @@
 Module Contents
 ---------------
 
+.. py:function:: add_is_compiled_mode(is_compiled_mode)
+
+   Add a function for determining whether we are currently executing "compiled mode".
+
+   Used when func:`set_enable_check_shapes` is set to ``EAGER_MODE_ONLY``.
+
+
 .. py:class:: ShapeCheckingState
 
    Bases: :py:obj:`enum.Enum`

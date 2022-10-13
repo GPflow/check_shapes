@@ -12,6 +12,7 @@ A library for annotating and checking the shapes of tensors.
    :titlesonly:
 
    User Guide <self>
+   benchmarks
    API reference <autoapi/check_shapes/index>
 
 
@@ -24,11 +25,33 @@ Example:
    :end-before: [basic]
    :dedent:
 
+Main features include:
+
+* Supports NumPy, TensorFlow, JAX and PyTorch out-of-the-box, and easy to extend to other
+  frameworks.
+* Checking the shapes of function arguments and return types, using a decorator.
+* Checking the shapes of local values, using a function.
+* Constant- and variable size dimensions.
+* Constant- and variable rank tensors.
+* Broadcasting.
+* Conditional shapes.
+* Reuse of shape specifications, including in class inheritance.
+* Automatic rewrite of docstrings to include shape information.
+
+
+Installation
+++++++++++++
+
+``check_shapes`` can be installed with ``pip`` as usual::
+
+  pip install check_shapes
+
 
 Speed, and interactions with `tf.function`
 ++++++++++++++++++++++++++++++++++++++++++
 
-Shape checking has some performance impact. Shape checking can be disabled to help alleviate this.
+Shape checking has some performance impact. For estimates of this impact see our :doc:`benchmarks`
+page. If the overhead is unacceptable shape checking can be disabled.
 Shape checking can be set to one of three different states:
 
 * ``ENABLED``. Shapes are checked wherever they can be.
@@ -452,18 +475,21 @@ This library has built-in support for checking the shapes of:
 
 * Python built-in scalars: ``bool``, ``int``, ``float`` and ``str``.
 * Python built-in sequences: ``tuple`` and ``list``.
-* NumPy ``ndarray``\\ s.
-* TensorFlow ``Tensor``\\ s and ``Variable``\\ s.
-* TensorFlow Probability ``DeferredTensor``\\ s, including ``TransformedVariable`` and
-  :class:`gpflow.Parameter`.
+* NumPy ``ndarray``\ s.
+* TensorFlow ``Tensor``\ s and ``Variable``\ s.
+* TensorFlow Probability ``DeferredTensor``\ s, including ``TransformedVariable``.
+* JAX ``ndarray``\ s.
+* PyTorch ``Tensor``\ s.
 
 
 Shapes of custom types
 ----------------------
 
 :mod:`check_shapes` uses the function :func:`get_shape` to extract the shape of an object.
-You can use :func:`register_get_shape` to extend :func:`get_shape` to extract shapes for you own
-custom types:
+:func:`get_shape` will try to read a property of the object with name ``shape``, which should have
+type ``Optional[Tuple[Optional[int], ...]]``. If you have a custom type that does not have such a
+property you can use :func:`register_get_shape` to extend :func:`get_shape` to extract the shape of
+your type:
 
 .. literalinclude:: /examples/test_check_shapes_examples.py
    :start-after: [custom_type]
