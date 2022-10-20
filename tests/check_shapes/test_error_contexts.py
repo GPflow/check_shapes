@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from functools import wraps
-from unittest.mock import MagicMock
 
 import pytest
-from lark.exceptions import UnexpectedCharacters, UnexpectedEOF, UnexpectedToken
 
 from check_shapes import set_enable_function_call_precompute
 from check_shapes.error_contexts import (
@@ -26,7 +24,6 @@ from check_shapes.error_contexts import (
     FunctionCallContext,
     FunctionDefinitionContext,
     IndexContext,
-    LarkUnexpectedInputContext,
     MappingKeyContext,
     MappingValueContext,
     MessageBuilder,
@@ -38,6 +35,7 @@ from check_shapes.error_contexts import (
     ShapeContext,
     StackContext,
     TensorSpecContext,
+    UnexpectedInputContext,
     VariableContext,
 )
 from check_shapes.specs import ParsedNoteSpec
@@ -764,70 +762,62 @@ Object type: tests.check_shapes.test_error_contexts.test_object_type_context__ne
     check_eq(context)
 
 
-def test_lark_unexpected_input_context__unexpected_eof() -> None:
-    text = ""
-    error = MagicMock(UnexpectedEOF, expected=["A", "B", "C"], line=-1, column=-1)
-    terminal_descriptions = {
-        "A": "Some a's",
-        "B": "Some b's",
-        "C": "Some c's",
-    }
-
-    context = LarkUnexpectedInputContext(text, error, terminal_descriptions)
-    assert """
-Expected one of: Some a's
-                 Some b's
-                 Some c's
-Found unexpected end of input.
-""" == to_str(
-        context
-    )
-    check_eq(context)
-
-
-def test_lark_unexpected_input_context__unexpected_characters() -> None:
-    text = """This is line 1
-This is line 2
-This is line 3
-"""
-    error = MagicMock(UnexpectedCharacters, line=2, column=9)
-    terminal_descriptions = {
-        "A": "Some a's",
-        "B": "Some b's",
-        "C": "Some c's",
-    }
-
-    context = LarkUnexpectedInputContext(text, error, terminal_descriptions)
-    assert """
-Line: "This is line 2"
-               ^
+@pytest.mark.parametrize(
+    "context,expected",
+    [
+        (
+            UnexpectedInputContext("""This is the only line""", 12, ("A",), is_eof=False),
+            """
+Line:     "This is the only line"
+                       ^
 Found unexpected character.
-""" == to_str(
-        context
-    )
-    check_eq(context)
-
-
-def test_lark_unexpected_input_context__unexpected_token() -> None:
-    text = """This is line 1
+Expected: A
+""",
+        ),
+        (
+            UnexpectedInputContext(
+                """This is the only line""",
+                12,
+                ("A", "B", "A"),
+                is_eof=False,
+            ),
+            """
+Line:            "This is the only line"
+                              ^
+Found unexpected character.
+Expected one of: A
+                 B
+""",
+        ),
+        (
+            UnexpectedInputContext(
+                """This is line 1
 This is line 2
-This is line 3
-"""
-    error = MagicMock(UnexpectedToken, accepts=["B"], line=1, column=14)
-    terminal_descriptions = {
-        "A": "Some a's",
-        "B": "Some b's",
-        "C": "Some c's",
-    }
-
-    context = LarkUnexpectedInputContext(text, error, terminal_descriptions)
-    assert """
-Line:     "This is line 1"
-                        ^
-Expected: Some b's
-""" == to_str(
-        context
-    )
+This is line 3""",
+                23,
+                ("A",),
+                is_eof=False,
+            ),
+            """
+Line:     "This is line 2"
+                   ^
+Found unexpected character.
+Expected: A
+""",
+        ),
+        (
+            UnexpectedInputContext("""This is the only line""", 21, ("A",), is_eof=True),
+            """
+Line:     "This is the only line"
+                                ^
+Found unexpected end of input.
+Expected: A
+""",
+        ),
+    ],
+)
+def test_unexpected_input_context(context: ErrorContext, expected: str) -> None:
+    assert expected == to_str(context)
     check_eq(context)
 
 
@@ -835,29 +825,23 @@ Expected: Some b's
     "context,expected",
     [
         (
-            MultipleElementBoolContext("foo bar", 1, 5),
+            MultipleElementBoolContext("This is the only line", 12),
             """
-Line: "foo bar"
-           ^
+Line: "This is the only line"
+                   ^
 Argument references that evaluate to multiple values are not supported for boolean expressions.
 """,
         ),
         (
-            MultipleElementBoolContext("foo bar", 0, 5),
+            MultipleElementBoolContext(
+                """This is line 1
+This is line 2
+This is line 3""",
+                23,
+            ),
             """
-Argument references that evaluate to multiple values are not supported for boolean expressions.
-""",
-        ),
-        (
-            MultipleElementBoolContext("foo bar", 1, 0),
-            """
-Line: "foo bar"
-Argument references that evaluate to multiple values are not supported for boolean expressions.
-""",
-        ),
-        (
-            MultipleElementBoolContext("foo bar", 0, 0),
-            """
+Line: "This is line 2"
+               ^
 Argument references that evaluate to multiple values are not supported for boolean expressions.
 """,
         ),

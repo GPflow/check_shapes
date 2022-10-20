@@ -38,14 +38,10 @@ from typing import (
     Dict,
     Iterator,
     List,
-    Mapping,
     Optional,
-    Sequence,
     Tuple,
     Union,
 )
-
-from lark.exceptions import UnexpectedCharacters, UnexpectedEOF, UnexpectedInput
 
 from .base_types import Shape
 from .config import get_enable_function_call_precompute
@@ -563,48 +559,47 @@ class ParserInputContext(ErrorContext, ABC):
     """
 
     text: str
+    index: int
 
-    def print_line(self, builder: MessageBuilder, line: int, column: int) -> None:
-        if line > 0:
-            line_content = self.text.split("\n")[line - 1]
-            builder.add_columned_line("Line:", f'"{line_content}"')
-            if column > 0:
-                builder.add_columned_line("", " " * column + "^")
+    def print_line(self, builder: MessageBuilder) -> None:
+        text = self.text
+        index = self.index
+
+        line_start = text.rfind("\n", 0, self.index)
+        if line_start != -1:
+            text = text[line_start + 1 :]
+            index -= line_start + 1
+
+        line_end = text.find("\n")
+        if line_end != -1:
+            text = text[:line_end]
+
+        builder.add_columned_line("Line:", f'"{text}"')
+        builder.add_columned_line("", " " * (index + 1) + "^")
 
 
 @dataclass(frozen=True)
-class LarkUnexpectedInputContext(ParserInputContext):
+class UnexpectedInputContext(ParserInputContext):
     """
-    An error was caused by an `UnexpectedInput` error from `Lark`.
+    An error was caused by a malformed specification or docstring.
     """
 
-    error: UnexpectedInput
-    terminal_descriptions: Mapping[str, str]
+    expected: Tuple[str, ...]
+    is_eof: bool
 
     def print(self, builder: MessageBuilder) -> None:
-        self.print_line(
-            builder,
-            getattr(self.error, "line", -1),
-            getattr(self.error, "column", -1),
-        )
+        self.print_line(builder)
 
-        expected: Sequence[str] = getattr(self.error, "accepts", [])
-        if not expected:
-            expected = getattr(self.error, "expected", [])
-        expected = sorted(expected)
-        expected_key = "Expected:" if len(expected) <= 1 else "Expected one of:"
-        for expected_name in expected:
-            expected_value = self.terminal_descriptions.get(expected_name, expected_name)
+        if self.is_eof:
+            builder.add_line("Found unexpected end of input.")
+        else:
+            builder.add_line("Found unexpected character.")
+
+        expected = sorted(set(self.expected))
+        expected_key = "Expected:" if len(self.expected) <= 1 else "Expected one of:"
+        for expected_value in expected:
             builder.add_columned_line(expected_key, expected_value)
             expected_key = ""
-
-        if isinstance(self.error, UnexpectedCharacters):
-            builder.add_line("Found unexpected character.")
-        if isinstance(self.error, UnexpectedEOF):
-            builder.add_line("Found unexpected end of input.")
-
-    def __hash__(self) -> int:
-        return hash((self.error, *sorted(self.terminal_descriptions.items())))
 
 
 @dataclass(frozen=True)
@@ -613,11 +608,9 @@ class MultipleElementBoolContext(ParserInputContext):
     An error was caused by trying to use a multi-element argument specification as a bool.
     """
 
-    line: int
-    column: int
-
     def print(self, builder: MessageBuilder) -> None:
-        self.print_line(builder, self.line, self.column)
+        self.print_line(builder)
+
         builder.add_line(
             "Argument references that evaluate to multiple values are not supported for boolean"
             " expressions."

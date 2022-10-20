@@ -14,25 +14,19 @@
 
 # pylint: disable=unused-argument
 
-from abc import ABC
-from dataclasses import replace
+import re
 from typing import (
     Any,
     Collection,
     Dict,
-    Iterable,
     List,
     Mapping,
     Optional,
     Sequence,
     Tuple,
     Type,
+    Union,
 )
-
-from lark.exceptions import UnexpectedInput
-from lark.lark import Lark
-from lark.lexer import PatternRE, PatternStr, Token
-from lark.tree import Tree
 
 from .argument_ref import (
     RESULT_TOKEN,
@@ -56,11 +50,11 @@ from .config import DocstringFormat, get_rewrite_docstrings
 from .error_contexts import (
     ArgumentContext,
     ErrorContext,
-    LarkUnexpectedInputContext,
     MultipleElementBoolContext,
     StackContext,
+    UnexpectedInputContext,
 )
-from .exceptions import CheckShapesError, DocstringParseError, SpecificationParseError
+from .exceptions import SpecificationParseError
 from .specs import (
     ParsedArgumentSpec,
     ParsedDimensionSpec,
@@ -70,189 +64,407 @@ from .specs import (
     ParsedTensorSpec,
 )
 
-_VARIABLE_RANK_LEADING_TOKEN = "*"
-_VARIABLE_RANK_TRAILING_TOKEN = "..."
+_TPattern = Tuple[str, str]
+"""
+A terminal kind in the ``check_shapes`` specification language.
+"""
 
 
-def _tree_children(tree: Tree[Token]) -> Iterable[Tree[Token]]:
-    """ Return all the children of `tree` that are trees themselves. """
-    return (child for child in tree.children if isinstance(child, Tree))
-
-
-def _token_children(tree: Tree[Token]) -> Iterable[str]:
-    """ Return the values of all the children of `tree` that are tokens. """
-    return (child.value for child in tree.children if isinstance(child, Token))
-
-
-class _TreeVisitor(ABC):
+def _literal_terminal(literal: str) -> _TPattern:
     """
-    Functionality for visiting the nodes of parse-trees.
+    Create a terminal that only matches exactly the given ``literal``.
+    """
+    return re.escape(literal), f'"{literal}"'
 
-    This differs from the classes built-in in Lark, in that it allows passing `*args` and
-    `**kwargs`.
 
-    Subclasses should add methods with the same name as Lark rules. Those methods should take the
-    parse tree of the rule, followed by any other `*args` and `**kwargs` you want. They may return
-    anything.
+_T_STAR = _literal_terminal("*")
+_T_ELLIPSIS = _literal_terminal("...")
+_T_DOT = _literal_terminal(".")
+_T_COLON = _literal_terminal(":")
+_T_COMMA = _literal_terminal(",")
+_T_LEFT_SQ = _literal_terminal("[")
+_T_RIGHT_SQ = _literal_terminal("]")
+_T_LEFT_PAREN = _literal_terminal("(")
+_T_RIGHT_PAREN = _literal_terminal(")")
+_T_BROADCAST = _literal_terminal("broadcast")
+_T_NONE = _literal_terminal("None")
+_T_IF = _literal_terminal("if")
+_T_IS = _literal_terminal("is")
+_T_NOT = _literal_terminal("not")
+_T_AND = _literal_terminal("and")
+_T_OR = _literal_terminal("or")
+_T_INT = (r"[0-9]+", "<integer>")
+_T_NAME = (r"[_a-zA-Z][_a-zA-Z0-9]*", "<variable name>")
+_T_NOTE = (r"#.*", '"#" <note>')
+_T_IGNORE = (r"\s+", "<ignoreable whitespace>")
+
+_T_ERROR = (r"", "<unable to tokenize>")
+"""
+Pseudo-terminal that is never actually matched against, but is used to represent an error during
+tokenisation.
+"""
+
+_TERMINALS = (
+    _T_STAR,
+    _T_ELLIPSIS,
+    _T_DOT,
+    _T_COLON,
+    _T_COMMA,
+    _T_LEFT_SQ,
+    _T_RIGHT_SQ,
+    _T_LEFT_PAREN,
+    _T_RIGHT_PAREN,
+    _T_BROADCAST,
+    _T_NONE,
+    _T_IF,
+    _T_IS,
+    _T_NOT,
+    _T_AND,
+    _T_OR,
+    _T_INT,
+    _T_NAME,
+    _T_NOTE,
+    _T_IGNORE,
+)
+
+_TERMINALS_RE = re.compile("|".join(f"({t[0]})" for t in _TERMINALS), flags=re.DOTALL)
+_SPACES_RE = re.compile(r"\s+")
+
+
+class _ShapeSpecParser:
+    """
+    Recursive descent parser for `check_shapes` specifications.
+
+    The terminal kinds of the language are defined by the above ``_T_*`` variables and
+    ``_TERMINALS``. Each of those are a 2-tuple with:
+
+    1. The regular expression pattern to match.
+    2. A human-readable name of the pattern, that will be used in error messages.
+
+    The ``__init__`` below tokenises the input ``source`` into ``self.tokens``, which is a list of
+    3-tuples with:
+
+    1. The index into ``self.source`` where the token was matched.
+    2. The kind of token, represented by the ``_T_*`` pattern that matched.
+    3. The content of the token - the substring of ``self.source`` that was matched.
+
+    ``self.i`` holds the input of the next token to process, so the next token is
+    ``self.tokens[self.i]``.
+
+    To process the next token call ``self._accept`` with the expected token kind.
+    If the next token fails to match expectations the expectation is added to ``self.expected``, and
+    an error code is returned. If the token is accepted, ``self.expected`` is cleared.
+    If we give up matching the next token, we call ``self._unexpected_input`` which will use
+    ``self.expected`` to create an error messages with all the token kinds we failed to match.
+
+    Otherwise this class has a method for each non-terminal / construct of this language.
+    After parsing your specification, call ``self.close()`` to check that the entire input string
+    has been consumed.
     """
 
-    def visit(self, tree: Tree[Token], *args: Any, **kwargs: Any) -> Any:
-        name = tree.data
-        visit = getattr(self, name, None)
-        assert visit, f"No method found with name {name}."
-        return visit(tree, *args, **kwargs)
-
-
-class _ParseSpec(_TreeVisitor):
-    def __init__(self, source: str) -> None:
-        self._source = source
-
-    def argument_spec(self, tree: Tree[Token]) -> ParsedArgumentSpec:
-        argument_ref, shape_spec, *other_specs = _tree_children(tree)
-        argument = self.visit(argument_ref, False)
-        shape = self.visit(shape_spec)
-        condition = None
-        note = None
-        for other_spec in other_specs:
-            other = self.visit(other_spec)
-            if isinstance(other, ParsedBoolSpec):
-                assert condition is None
-                condition = other
+    def __init__(self, source: str, context: ErrorContext) -> None:
+        l = len(source)
+        i = 0
+        tokens: List[Tuple[int, _TPattern, str]] = []
+        while i < l:
+            match = _TERMINALS_RE.match(source, i)
+            if match:
+                terminal = _TERMINALS[match.lastindex - 1]  # type: ignore[operator]
+                if terminal is not _T_IGNORE:
+                    tokens.append((i, terminal, match.group()))
+                i = match.end()
             else:
-                assert isinstance(other, ParsedNoteSpec)
-                assert note is None
-                note = other
-        tensor = ParsedTensorSpec(shape, note)
-        return ParsedArgumentSpec(argument, tensor, condition)
+                tokens.append((i, _T_ERROR, ""))
+                i = l
 
-    def bool_spec_or(self, tree: Tree[Token]) -> ParsedBoolSpec:
-        left, right = _tree_children(tree)
-        return ParsedOrBoolSpec(self.visit(left), self.visit(right))
+        self.source = source
+        self.tokens = tokens
+        self.i = 0
+        self.context = context
+        self.expected: List[str] = []
 
-    def bool_spec_and(self, tree: Tree[Token]) -> ParsedBoolSpec:
-        left, right = _tree_children(tree)
-        return ParsedAndBoolSpec(self.visit(left), self.visit(right))
+    def _unexpected_input(self) -> None:
+        """
+        Call this when we give up on consuming the next token.
+        """
+        l = len(self.tokens)
+        is_eof = self.i >= l
+        i = len(self.source) if is_eof else self.tokens[self.i][0]
+        context = StackContext(
+            self.context, UnexpectedInputContext(self.source, i, tuple(self.expected), is_eof)
+        )
+        raise SpecificationParseError(context)
 
-    def bool_spec_not(self, tree: Tree[Token]) -> ParsedBoolSpec:
-        (right,) = _tree_children(tree)
-        return ParsedNotBoolSpec(self.visit(right))
+    def _multiple_element_spec(self, is_for_bool_spec: bool) -> None:
+        """
+        Call this if the user tries to use a multi-element argument specification in a boolean
+        context.
+        """
+        if not is_for_bool_spec:
+            return
+        l = len(self.tokens)
+        token_i = self.i - 1
+        is_eof = token_i >= l
+        source_i = len(self.source) if is_eof else self.tokens[token_i][0]
+        context = StackContext(self.context, MultipleElementBoolContext(self.source, source_i))
+        raise SpecificationParseError(context)
 
-    def bool_spec_argument_ref_is_none(self, tree: Tree[Token]) -> ParsedBoolSpec:
-        (argument_ref,) = _tree_children(tree)
-        return ParsedArgumentRefBoolSpec(self.visit(argument_ref, True), BoolTest.IS_NONE)
+    def _accept(
+        self,
+        expected: _TPattern,
+        expected_value: Optional[str] = None,
+        *,
+        required: bool = False,
+        out_type: Optional[Type[Any]] = None,
+        error_mesg: Optional[str] = None,
+    ) -> Any:
+        """
+        Tries to consume the next token.
 
-    def bool_spec_argument_ref_is_not_none(self, tree: Tree[Token]) -> ParsedBoolSpec:
-        (argument_ref,) = _tree_children(tree)
-        return ParsedArgumentRefBoolSpec(self.visit(argument_ref, True), BoolTest.IS_NOT_NONE)
+        The token is only consumed if it matches certain expectations. If not, a value indicating
+        error is returned.
 
-    def bool_spec_argument_ref(self, tree: Tree[Token]) -> ParsedBoolSpec:
-        (argument_ref,) = _tree_children(tree)
-        return ParsedArgumentRefBoolSpec(self.visit(argument_ref, True), BoolTest.BOOL)
+        For the token to be consumed it must have ``expected`` kind. If ``expected_value`` is set
+        the value of the token must also match this value.
 
-    def argument_ref_root(self, tree: Tree[Token], is_for_bool_spec: bool) -> ArgumentRef:
-        (token,) = _token_children(tree)
-        return RootArgumentRef(token)
+        * If ``required=True`` and the token is not consumed, then an error is raised.
+        * If ``out_type`` is set and the token is consumed then the value of the token is converted
+          to the given type and returned.
+        * If ``out_type`` is set and the token is is not consumed then ``None`` is returned.
+        * If ``required=False`` and ``out_type=None`` and then a ``bool`` indicating whether the
+          token was consumed is returned.
 
-    def argument_ref_attribute(self, tree: Tree[Token], is_for_bool_spec: bool) -> ArgumentRef:
-        (source,) = _tree_children(tree)
-        (token,) = _token_children(tree)
-        return AttributeArgumentRef(self.visit(source, is_for_bool_spec), token)
+        ``error_mesg`` can be used to define the user-visible "expected" value to print if a token
+        is not found. If unset, a default value for the kind of token is used.
+        """
+        if error_mesg is None:
+            error_mesg = expected[1]
+        self.expected.append(error_mesg)
 
-    def argument_ref_index(self, tree: Tree[Token], is_for_bool_spec: bool) -> ArgumentRef:
-        (source,) = _tree_children(tree)
-        (token,) = _token_children(tree)
-        return IndexArgumentRef(self.visit(source, is_for_bool_spec), int(token))
+        if self.i >= len(self.tokens):
+            if required:
+                self._unexpected_input()
+            return None if out_type else False
+        token = self.tokens[self.i]
+        if token[1] is expected and (expected_value is None or token[2] == expected_value):
+            self.expected.clear()
+            self.i += 1
+            return out_type(token[2]) if out_type else True
+        if required:
+            self._unexpected_input()
+        return None if out_type else False
 
-    def argument_ref_all(self, tree: Tree[Token], is_for_bool_spec: bool) -> ArgumentRef:
-        (source,) = _tree_children(tree)
-        self._disallow_multiple_element_bool_spec(source, is_for_bool_spec)
-        return AllElementsRef(self.visit(source, is_for_bool_spec))
+    def _note_spec(self) -> Optional[ParsedNoteSpec]:
+        value = self._accept(_T_NOTE, out_type=str)
+        if value is None:
+            return None
+        value = value[1:]
+        value = value.strip()
+        value = _SPACES_RE.sub(" ", value)
+        return ParsedNoteSpec(value)
 
-    def argument_ref_keys(self, tree: Tree[Token], is_for_bool_spec: bool) -> ArgumentRef:
-        (source,) = _tree_children(tree)
-        self._disallow_multiple_element_bool_spec(source, is_for_bool_spec)
-        return KeysRef(self.visit(source, is_for_bool_spec))
-
-    def argument_ref_values(self, tree: Tree[Token], is_for_bool_spec: bool) -> ArgumentRef:
-        (source,) = _tree_children(tree)
-        self._disallow_multiple_element_bool_spec(source, is_for_bool_spec)
-        return ValuesRef(self.visit(source, is_for_bool_spec))
-
-    def _disallow_multiple_element_bool_spec(
-        self, source: Tree[Token], is_for_bool_spec: bool
-    ) -> None:
-        if is_for_bool_spec:
-            meta = source.meta
-            raise SpecificationParseError(
-                MultipleElementBoolContext(self._source, meta.end_line, meta.end_column)
-            )
-
-    def tensor_spec(self, tree: Tree[Token]) -> ParsedTensorSpec:
-        shape_spec, *note_specs = _tree_children(tree)
-        shape = self.visit(shape_spec)
-        if note_specs:
-            (note_spec,) = note_specs
-            note = self.visit(note_spec)
+    def _dimension_spec(self) -> ParsedDimensionSpec:
+        match = False
+        constant: Optional[int] = None
+        variable_name: Optional[str] = None
+        variable_rank = False
+        broadcastable = False
+        if self._accept(_T_BROADCAST):
+            broadcastable = True
+        if self._accept(_T_ELLIPSIS):
+            variable_rank = True
+            match = True
+        elif self._accept(_T_DOT) or self._accept(_T_NONE):
+            match = True
         else:
-            note = None
-        return ParsedTensorSpec(shape, note)
-
-    def shape_spec(self, tree: Tree[Token]) -> ParsedShapeSpec:
-        (dimension_specs,) = _tree_children(tree)
-        return ParsedShapeSpec(self.visit(dimension_specs))
-
-    def dimension_specs(self, tree: Tree[Token]) -> Tuple[ParsedDimensionSpec, ...]:
-        return tuple(
-            self.visit(dimension_spec, i) for i, dimension_spec in enumerate(_tree_children(tree))
-        )
-
-    def dimension_spec_broadcast(self, tree: Tree[Token], i: int) -> ParsedDimensionSpec:
-        (dimension_spec,) = _tree_children(tree)
-        child = self.visit(dimension_spec, i)
-        assert isinstance(child, ParsedDimensionSpec)
-        return replace(child, broadcastable=True)
-
-    def dimension_spec_constant(self, tree: Tree[Token], i: int) -> ParsedDimensionSpec:
-        (token,) = _token_children(tree)
+            int_value = self._accept(_T_INT, out_type=int)
+            if int_value is not None:
+                constant = int_value
+                match = True
+            else:
+                if self._accept(_T_STAR):
+                    variable_rank = True
+                    match = True
+                name_value = self._accept(_T_NAME, out_type=str)
+                if name_value is not None:
+                    variable_name = name_value
+                    match = True
+                if not variable_rank and self._accept(_T_ELLIPSIS):
+                    variable_rank = True
+                    match = True
+        if not match:
+            self._unexpected_input()
+            assert False, "This line should be unreachable."
         return ParsedDimensionSpec(
-            constant=int(token), variable_name=None, variable_rank=False, broadcastable=False
+            constant=constant,
+            variable_name=variable_name,
+            variable_rank=variable_rank,
+            broadcastable=broadcastable,
         )
 
-    def dimension_spec_variable(self, tree: Tree[Token], i: int) -> ParsedDimensionSpec:
-        (token,) = _token_children(tree)
-        return ParsedDimensionSpec(
-            constant=None, variable_name=token, variable_rank=False, broadcastable=False
-        )
+    def _shape_spec(self) -> ParsedShapeSpec:
+        self._accept(_T_LEFT_SQ, required=True)
+        dimension_specs = []
+        if not self._accept(_T_RIGHT_SQ):
+            while True:
+                dimension_specs.append(self._dimension_spec())
+                if self._accept(_T_COMMA):
+                    if self._accept(_T_RIGHT_SQ):
+                        break
+                elif self._accept(_T_RIGHT_SQ):
+                    break
+                else:
+                    self._unexpected_input()
+        return ParsedShapeSpec(tuple(dimension_specs))
 
-    def dimension_spec_anonymous(self, tree: Tree[Token], i: int) -> ParsedDimensionSpec:
-        return ParsedDimensionSpec(
-            constant=None, variable_name=None, variable_rank=False, broadcastable=False
-        )
+    def tensor_spec(self) -> ParsedTensorSpec:
+        shape_spec = self._shape_spec()
+        note_spec = self._note_spec()
+        return ParsedTensorSpec(shape_spec, note_spec)
 
-    def dimension_spec_variable_rank(self, tree: Tree[Token], i: int) -> ParsedDimensionSpec:
-        (token1, token2) = _token_children(tree)
-        if token1 == _VARIABLE_RANK_LEADING_TOKEN:
-            variable_name = token2
+    def _argument_ref(self, is_for_bool_spec: bool) -> Optional[ArgumentRef]:
+        name_value = self._accept(_T_NAME, out_type=str)
+        if name_value is None:
+            return None
+        result: ArgumentRef = RootArgumentRef(name_value)
+        while True:
+            if self._accept(_T_DOT):
+                if self._accept(_T_NAME, "keys", error_mesg='"keys"'):
+                    self._multiple_element_spec(is_for_bool_spec)
+                    self._accept(_T_LEFT_PAREN, required=True)
+                    self._accept(_T_RIGHT_PAREN, required=True)
+                    result = KeysRef(result)
+                elif self._accept(_T_NAME, "values", error_mesg='"values"'):
+                    self._multiple_element_spec(is_for_bool_spec)
+                    self._accept(_T_LEFT_PAREN, required=True)
+                    self._accept(_T_RIGHT_PAREN, required=True)
+                    result = ValuesRef(result)
+                else:
+                    name_value = self._accept(_T_NAME, out_type=str)
+                    if name_value is None:
+                        self._unexpected_input()
+                        assert False, "This line should be unreachable."
+                    result = AttributeArgumentRef(result, name_value)
+            elif self._accept(_T_LEFT_SQ):
+                if self._accept(_T_NAME, "all", error_mesg='"all"'):
+                    self._multiple_element_spec(is_for_bool_spec)
+                    result = AllElementsRef(result)
+                else:
+                    int_value = self._accept(_T_INT, out_type=int)
+                    if int_value is None:
+                        self._unexpected_input()
+                        assert False, "This line should be unreachable."
+                    result = IndexArgumentRef(result, int_value)
+                self._accept(_T_RIGHT_SQ, required=True)
+            else:
+                break
+        return result
+
+    def _bool_spec_base(self) -> ParsedBoolSpec:
+        if self._accept(_T_LEFT_PAREN):
+            bool_spec: ParsedBoolSpec = self._bool_spec()
+            self._accept(_T_RIGHT_PAREN, required=True)
+            return bool_spec
+        if self._accept(_T_NOT):
+            return ParsedNotBoolSpec(self._bool_spec_base())
+        maybe_argument_ref = self._argument_ref(is_for_bool_spec=True)
+        if maybe_argument_ref is None:
+            self._unexpected_input()
         else:
-            assert token2 == _VARIABLE_RANK_TRAILING_TOKEN
-            variable_name = token1
-        return ParsedDimensionSpec(
-            constant=None, variable_name=variable_name, variable_rank=True, broadcastable=False
+            argument_ref = maybe_argument_ref
+        if self._accept(_T_IS):
+            if self._accept(_T_NONE):
+                bool_spec = ParsedArgumentRefBoolSpec(argument_ref, BoolTest.IS_NONE)
+            elif self._accept(_T_NOT):
+                self._accept(_T_NONE, required=True)
+                bool_spec = ParsedArgumentRefBoolSpec(argument_ref, BoolTest.IS_NOT_NONE)
+            else:
+                self._unexpected_input()
+        else:
+            bool_spec = ParsedArgumentRefBoolSpec(argument_ref, BoolTest.BOOL)
+        return bool_spec
+
+    def _bool_spec_and(self) -> ParsedBoolSpec:
+        lhs = self._bool_spec_base()
+        if self._accept(_T_AND):
+            rhs = self._bool_spec_and()
+            return ParsedAndBoolSpec(lhs, rhs)
+        return lhs
+
+    def _bool_spec_or(self) -> ParsedBoolSpec:
+        lhs = self._bool_spec_and()
+        if self._accept(_T_OR):
+            rhs = self._bool_spec_or()
+            return ParsedOrBoolSpec(lhs, rhs)
+        return lhs
+
+    def _bool_spec(self) -> ParsedBoolSpec:
+        return self._bool_spec_or()
+
+    def _argument_spec(self) -> Optional[ParsedArgumentSpec]:
+        argument_ref = self._argument_ref(is_for_bool_spec=False)
+        if argument_ref is None:
+            return None
+        self._accept(_T_COLON, required=True)
+        shape_spec = self._shape_spec()
+        bool_spec = self._bool_spec() if self._accept(_T_IF) else None
+        note_spec = self._note_spec()
+        return ParsedArgumentSpec(
+            argument_ref,
+            ParsedTensorSpec(shape_spec, note_spec),
+            bool_spec,
         )
 
-    def dimension_spec_anonymous_variable_rank(
-        self, tree: Tree[Token], i: int
-    ) -> ParsedDimensionSpec:
-        return ParsedDimensionSpec(
-            constant=None, variable_name=None, variable_rank=True, broadcastable=False
-        )
+    def argument_or_note_spec(self) -> Union[ParsedNoteSpec, ParsedArgumentSpec]:
+        argument_spec = self._argument_spec()
+        if argument_spec is not None:
+            return argument_spec
+        note_spec = self._note_spec()
+        if note_spec is not None:
+            return note_spec
+        self._unexpected_input()
+        assert False, "This line should be unreachable."
 
-    def note_spec(self, tree: Tree[Token]) -> ParsedNoteSpec:
-        _hash_token, *note_tokens = _token_children(tree)
-        return ParsedNoteSpec(" ".join(token.strip() for token in note_tokens))
+    def close(self) -> None:
+        if self.i != len(self.tokens):
+            self.expected.append("<end of input>")
+            self._unexpected_input()
+
+    def __str__(self) -> str:
+        tokens = []
+        for i, t in enumerate(self.tokens):
+            prefix = ">>> " if i == self.i else "    "
+            tokens.append(prefix + str(t))
+        return "\n".join(tokens)
 
 
-class _RewritedocString(_TreeVisitor):
+_InfoField = Tuple[str, str, int, int]
+
+_PARAM_FIELDS = {"param", "parameter", "arg", "argument", "key", "keyword"}
+_TYPE_FIELDS = {"type"}
+_RAISES_FIELDS = {"raises", "raise", "except", "exception"}
+_VAR_FIELDS = {"var", "ivar", "cvar"}
+_VARTYPE_FIELDS = {"vartype"}
+_RETURNS_FIELDS = {"returns", "return"}
+_RTYPE_FIELDS = {"rtype"}
+_META_FIELDS = {"meta"}
+_ALL_FIELDS = (
+    _PARAM_FIELDS
+    | _TYPE_FIELDS
+    | _RAISES_FIELDS
+    | _VAR_FIELDS
+    | _VARTYPE_FIELDS
+    | _RETURNS_FIELDS
+    | _RTYPE_FIELDS
+    | _META_FIELDS
+)
+_INFO_FIELD_RE = re.compile(
+    "^ *(:(" + "|".join(_ALL_FIELDS) + ")( +([ _a-zA-Z0-9]+))? *: *)", flags=re.MULTILINE
+)
+_TEXT_RE = re.compile(r"\s*(.*\S)\s*", flags=re.DOTALL)
+
+
+class _RewritedocString:
     def __init__(self, source: str, function_spec: ParsedFunctionSpec) -> None:
         self._source = source
         self._spec_lines = self._argument_specs_to_sphinx(function_spec.arguments)
@@ -371,11 +583,11 @@ class _RewritedocString(_TreeVisitor):
         return indent if indent != no_indent else None
 
     def _insert_spec_lines(
-        self, out: List[str], pos: int, spec_lines: Sequence[str], docs: Tree[Token]
+        self, out: List[str], pos: int, spec_lines: Sequence[str], info_field: _InfoField
     ) -> int:
-        leading_str = self._source[pos : docs.meta.start_pos].rstrip()
+        leading_str = self._source[pos : info_field[2]].rstrip()
         docs_start = pos + len(leading_str)
-        docs_str = self._source[docs_start : docs.meta.end_pos]
+        docs_str = self._source[docs_start : info_field[3]]
         trailing_str = docs_str.lstrip()
 
         docs_indent = self._guess_indent(docs_str)
@@ -393,7 +605,7 @@ class _RewritedocString(_TreeVisitor):
         out.append("\n")
         out.append(indent_str)
         out.append(trailing_str)
-        return docs.meta.end_pos
+        return info_field[3]
 
     def _insert_param_info_fields(
         self,
@@ -437,21 +649,55 @@ class _RewritedocString(_TreeVisitor):
 
         return pos
 
-    def docstring(self, tree: Tree[Token]) -> str:
+    def docstring(self) -> str:
         # The strategy here is:
         # * `out` contains a list of strings that will be concatenated and form the final result.
         # * `pos` is the position such that `self._source[:pos]` has already been added to `out`,
         #   and `self._source[pos:]` still needs to be added.
         # * When visiting children we pass `out` and `pos`, and the children add content to `out`
         #   and return a new `pos`.
-        docs, info_fields = _tree_children(tree)
         out: List[str] = []
+        info_fields: List[_InfoField] = []
         pos = 0
 
+        def get_text_indices(start: int, end: int) -> Tuple[int, int]:
+            match = _TEXT_RE.fullmatch(self._source, start, end)
+            if match:
+                return match.start(1), match.end(1)
+            else:
+                return start, start
+
+        prev_match = None
+        for match in _INFO_FIELD_RE.finditer(self._source):
+            if prev_match is None:
+                docs_end = get_text_indices(0, match.start(0))[1]
+            else:
+                info_fields.append(
+                    (
+                        prev_match.group(2),
+                        prev_match.group(4),
+                        *get_text_indices(prev_match.end(0), match.start(1)),
+                    )
+                )
+
+            prev_match = match
+
+        if prev_match is None:
+            docs_match = _TEXT_RE.match(self._source)
+            docs_end = docs_match.end(0) if docs_match else 0
+        else:
+            info_fields.append(
+                (
+                    prev_match.group(2),
+                    prev_match.group(4),
+                    *get_text_indices(prev_match.end(0), len(self._source)),
+                )
+            )
+
         if self._notes:
-            if not docs.meta.empty:
-                out.append(self._source[pos : docs.meta.end_pos])
-                pos = docs.meta.end_pos
+            if docs_end:
+                out.append(self._source[pos:docs_end])
+                pos = docs_end
             indent = self._indent or 0
             indent_str = indent * " "
             for note in self._notes:
@@ -460,17 +706,20 @@ class _RewritedocString(_TreeVisitor):
                 out.append(indent_str)
                 out.append(note)
 
-        pos = self.visit(info_fields, out, pos)
+        pos = self._info_fields(info_fields, out, pos)
         out.append(self._source[pos:])
 
         return "".join(out)
 
-    def info_fields(self, tree: Tree[Token], out: List[str], pos: int) -> int:
+    def _info_fields(self, info_fields: Sequence[_InfoField], out: List[str], pos: int) -> int:
         spec_lines = dict(self._spec_lines)
         is_first_info_field = True
-        for child in _tree_children(tree):
+        for info_field in info_fields:
             # This will remove the self._spec_lines corresponding to found `:param:`'s.
-            pos = self.visit(child, spec_lines, out, pos)
+            if info_field[0] in _PARAM_FIELDS:
+                pos = self._info_field_param(info_field, spec_lines, out, pos)
+            elif info_field[0] in _RETURNS_FIELDS:
+                pos = self._info_field_returns(info_field, spec_lines, out, pos)
             is_first_info_field = False
 
         # Add any remaining `:param:`s:
@@ -483,159 +732,39 @@ class _RewritedocString(_TreeVisitor):
 
         return pos
 
-    def info_field_param(
-        self, tree: Tree[Token], spec_lines: Dict[str, Sequence[str]], out: List[str], pos: int
+    def _info_field_param(
+        self, info_field: _InfoField, spec_lines: Dict[str, Sequence[str]], out: List[str], pos: int
     ) -> int:
-        info_field_args, docs = _tree_children(tree)
-        arg_name = self.visit(info_field_args)
+        arg_name = info_field[1]
         arg_lines = spec_lines.pop(arg_name, None)
         if arg_lines:
-            pos = self._insert_spec_lines(out, pos, arg_lines, docs)
+            pos = self._insert_spec_lines(out, pos, arg_lines, info_field)
         return pos
 
-    def info_field_returns(
-        self, tree: Tree[Token], spec_lines: Dict[str, Sequence[str]], out: List[str], pos: int
+    def _info_field_returns(
+        self, info_field: _InfoField, spec_lines: Dict[str, Sequence[str]], out: List[str], pos: int
     ) -> int:
-        (docs,) = _tree_children(tree)
         return_lines = spec_lines.pop(RESULT_TOKEN, None)
         if return_lines:
-            pos = self._insert_spec_lines(out, pos, return_lines, docs)
+            pos = self._insert_spec_lines(out, pos, return_lines, info_field)
         return pos
 
-    def info_field_other(
-        self, tree: Tree[Token], spec_lines: Dict[str, Sequence[str]], out: List[str], pos: int
-    ) -> int:
-        return pos
 
-    def info_field_args(self, tree: Tree[Token]) -> str:
-        tokens = list(_token_children(tree))
-        if not tokens:
-            return ""
-        return tokens[-1]
-
-
-class _CachedParser:
-    """
-    Small wrapper around Lark so that we can reuse as much code as possible between the different
-    things we parse.
-    """
-
-    def __init__(
-        self,
-        grammar_filename: str,
-        start_symbol: str,
-        parser_name: str,
-        re_terminal_descriptions: Mapping[str, str],
-        transformer_class: Type[_TreeVisitor],
-        exception_class: Type[CheckShapesError],
-    ) -> None:
-        self._cache: Dict[Tuple[str, Tuple[Any, ...]], Any] = {}
-        self._parser = Lark.open(
-            grammar_filename,
-            rel_to=__file__,
-            propagate_positions=True,
-            start=start_symbol,
-            parser=parser_name,
-        )
-        self._terminal_descriptions = {}
-        self._transformer_class = transformer_class
-        self._exception_class = exception_class
-
-        # Pre-compute nice terminal descriptions for our error messages:
-        missing = set()
-        unused = dict(re_terminal_descriptions)
-        for terminal in self._parser.terminals:
-            name = terminal.name
-            pattern = terminal.pattern
-            if isinstance(pattern, PatternStr):
-                description = f'"{pattern.value}"'
-            else:
-                assert isinstance(pattern, PatternRE)
-                unused_description = unused.pop(name, None)
-                # If we enter this `if` then the parser is misconfigured, so we never get here, even
-                # during tests.
-                if unused_description is None:  # pragma: no cover
-                    missing.add(name)
-                    description = "ERROR"
-                else:
-                    description = f"{re_terminal_descriptions[name]} (re={pattern.value})"
-            self._terminal_descriptions[name] = description
-        assert not unused, f"Redundant terminal descriptions were provided: {sorted(unused)}"
-        assert not missing, f"Some RE terminals did not have a description: {sorted(missing)}"
-
-    def parse(self, text: str, transformer_args: Tuple[Any, ...], context: ErrorContext) -> Any:
-        sentinel = object()
-        cache_key = (text, transformer_args)
-        result = self._cache.get(cache_key, sentinel)
-        if result is sentinel:
-            try:
-                tree = self._parser.parse(text)
-            except UnexpectedInput as ui:
-                raise self._exception_class(
-                    StackContext(
-                        context, LarkUnexpectedInputContext(text, ui, self._terminal_descriptions)
-                    )
-                ) from ui
-
-            try:
-                result = self._transformer_class(*transformer_args).visit(tree)
-            except CheckShapesError as cse:
-                raise self._exception_class(StackContext(context, cse.context)) from cse
-
-            self._cache[cache_key] = result
-        return result
-
-
-_TENSOR_SPEC_PARSER = _CachedParser(
-    grammar_filename="check_shapes.lark",
-    start_symbol="tensor_spec",
-    parser_name="lalr",
-    re_terminal_descriptions={
-        "NOTE_TEXT": "note / comment text",
-        "CNAME": "variable name",
-        "INT": "integer",
-        "WS": "whitespace",
-    },
-    transformer_class=_ParseSpec,
-    exception_class=SpecificationParseError,
-)
-_ARGUMENT_SPEC_PARSER = _CachedParser(
-    grammar_filename="check_shapes.lark",
-    start_symbol="argument_or_note_spec",
-    parser_name="lalr",
-    re_terminal_descriptions={
-        "NOTE_TEXT": "note / comment text",
-        "CNAME": "variable name",
-        "INT": "integer",
-        "WS": "whitespace",
-    },
-    transformer_class=_ParseSpec,
-    exception_class=SpecificationParseError,
-)
-_SPHINX_DOCSTRING_PARSER = _CachedParser(
-    grammar_filename="docstring.lark",
-    start_symbol="docstring",
-    parser_name="earley",
-    re_terminal_descriptions={
-        "ANY": "any text",
-        "CNAME": "variable name",
-        "INFO_FIELD_OTHER": "Sphinx info field",
-        "PARAM": "Sphinx parameter field",
-        "RETURNS": "Sphinx `return` field",
-        "WS": "whitespace",
-    },
-    transformer_class=_RewritedocString,
-    exception_class=DocstringParseError,
-)
+_TENSOR_SPEC_CACHE: Dict[str, ParsedTensorSpec] = {}
+_ARGUMENT_OR_NOTE_SPEC_CACHE: Dict[str, Union[ParsedArgumentSpec, ParsedNoteSpec]] = {}
+_SPHINX_REWRITE_CACHE: Dict[Tuple[str, ParsedFunctionSpec], str] = {}
 
 
 def parse_tensor_spec(tensor_spec: str, context: ErrorContext) -> ParsedTensorSpec:
-
     """
     Parse a `check_shapes` tensor specification.
     """
-    result = _TENSOR_SPEC_PARSER.parse(tensor_spec, (tensor_spec,), context)
-    assert isinstance(result, ParsedTensorSpec)
+    result = _TENSOR_SPEC_CACHE.get(tensor_spec)
+    if result is None:
+        parser = _ShapeSpecParser(tensor_spec, context)
+        result = parser.tensor_spec()
+        parser.close()
+        _TENSOR_SPEC_CACHE[tensor_spec] = result
     return result
 
 
@@ -646,13 +775,18 @@ def parse_function_spec(function_spec: Sequence[str], context: ErrorContext) -> 
     arguments = []
     notes = []
     for i, spec in enumerate(function_spec):
-        argument_context = StackContext(context, ArgumentContext(i))
-        parsed_spec = _ARGUMENT_SPEC_PARSER.parse(spec, (spec,), argument_context)
-        if isinstance(parsed_spec, ParsedArgumentSpec):
-            arguments.append(parsed_spec)
+        result = _ARGUMENT_OR_NOTE_SPEC_CACHE.get(spec)
+        if result is None:
+            argument_context = StackContext(context, ArgumentContext(i))
+            parser = _ShapeSpecParser(spec, argument_context)
+            result = parser.argument_or_note_spec()
+            parser.close()
+            _ARGUMENT_OR_NOTE_SPEC_CACHE[spec] = result
+        if isinstance(result, ParsedArgumentSpec):
+            arguments.append(result)
         else:
-            assert isinstance(parsed_spec, ParsedNoteSpec)
-            notes.append(parsed_spec)
+            assert isinstance(result, ParsedNoteSpec)
+            notes.append(result)
     return ParsedFunctionSpec(tuple(arguments), tuple(notes))
 
 
@@ -673,6 +807,10 @@ def parse_and_rewrite_docstring(
         f"Current docstring format is {docstring_format}, but I don't know how to rewrite that."
         " See `check_shapes.config.set_rewrite_docstrings`."
     )
-    result = _SPHINX_DOCSTRING_PARSER.parse(docstring, (docstring, function_spec), context)
-    assert isinstance(result, str)
+
+    result = _SPHINX_REWRITE_CACHE.get((docstring, function_spec))
+    if result is None:
+        parser = _RewritedocString(docstring, function_spec)
+        result = parser.docstring()
+        _SPHINX_REWRITE_CACHE[(docstring, function_spec)] = result
     return result
