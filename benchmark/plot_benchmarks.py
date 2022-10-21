@@ -13,17 +13,23 @@
 # limitations under the License.
 import argparse
 from pathlib import Path
+from typing import Any, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
+
+from .stats import Stats
+
+NDArray = Any
 
 
 def plot(output_dir: Path) -> None:
     result_dfs = [pd.read_csv(f) for f in output_dir.glob("results_*.csv")]
     results_df = pd.concat(result_dfs, axis="index", ignore_index=True)
 
-    n_columns = 2
+    n_columns = 3
     n_rows = len(results_df.name.unique())
     width = 6 * n_columns
     height = 4 * n_rows
@@ -37,74 +43,46 @@ def plot(output_dir: Path) -> None:
 
     for i, (ax_name, ax_df) in enumerate(results_df.groupby("name")):
         line_xs = []
-        line_y_with_means = []
-        line_y_with_uppers = []
-        line_y_with_lowers = []
-        line_y_without_means = []
-        line_y_without_uppers = []
-        line_y_without_lowers = []
-        line_y_overhead_means = []
-        line_y_overhead_uppers = []
-        line_y_overhead_lowers = []
+        line_ys = []
 
         for timestamp, timestamp_df in ax_df.groupby("timestamp"):
-            by_cs = timestamp_df.groupby("check_shapes")
-            mean_by_cs = by_cs.time_s.mean()
-            std_by_cs = by_cs.time_s.std().fillna(0.0)
-            var_by_cs = by_cs.time_s.var().fillna(0.0)
-
-            with_mean = mean_by_cs[True]
-            with_mean_sq = with_mean ** 2
-            with_std = std_by_cs[True]
-            with_var = var_by_cs[True]
-            without_mean = mean_by_cs[False]
-            without_mean_sq = without_mean ** 2
-            without_std = std_by_cs[False]
-            without_var = var_by_cs[False]
-
-            overhead_mean = (with_mean / without_mean) - 1
-            # https://en.wikipedia.org/wiki/Ratio_distribution#Uncorrelated_noncentral_normal_ratio
-            overhead_var = (with_mean_sq / without_mean_sq) * (
-                (with_var / with_mean_sq) + (without_var / without_mean_sq)
-            )
-            overhead_std = np.sqrt(overhead_var)
-
             line_xs.append(timestamp)
-            line_y_with_means.append(with_mean)
-            line_y_with_uppers.append(with_mean + 1.96 * with_std)
-            line_y_with_lowers.append(with_mean - 1.96 * with_std)
-            line_y_without_means.append(without_mean)
-            line_y_without_uppers.append(without_mean + 1.96 * without_std)
-            line_y_without_lowers.append(without_mean - 1.96 * without_std)
-            line_y_overhead_means.append(100 * overhead_mean)
-            line_y_overhead_uppers.append(100 * (overhead_mean + 1.96 * overhead_std))
-            line_y_overhead_lowers.append(100 * (overhead_mean - 1.96 * overhead_std))
+            line_ys.append(Stats.new(timestamp_df))
+
+        def plot_mean_and_std(
+            ax: Axes, prefix: str, *, label: Optional[str] = None, scale: float = 1.0
+        ) -> None:
+            mean_name = f"{prefix}_mean"
+            std_name = f"{prefix}_std"
+
+            # pylint: disable=cell-var-from-loop
+            mean: NDArray = np.array([getattr(y, mean_name) for y in line_ys]) * scale
+            std: NDArray = np.array([getattr(y, std_name) for y in line_ys]) * scale
+            lower: NDArray = mean - 1.96 * std
+            upper: NDArray = mean + 1.96 * std
+
+            (mean_line,) = ax.plot(line_xs, mean, label=label)
+            color = mean_line.get_color()
+            ax.fill_between(line_xs, lower, upper, color=color, alpha=0.3)
+
+            ax.set_title(ax_name)
+            ax.tick_params(axis="x", labelrotation=30)
+            if np.min(lower) > 0:
+                ax.set_ylim(bottom=0.0)
 
         ax = axes[i][0]
-        (mean_line,) = ax.plot(line_xs, line_y_with_means, label="with check_shapes")
-        color = mean_line.get_color()
-        ax.fill_between(line_xs, line_y_with_lowers, line_y_with_uppers, color=color, alpha=0.3)
-        (mean_line,) = ax.plot(line_xs, line_y_without_means, label="without check_shapes")
-        color = mean_line.get_color()
-        ax.fill_between(
-            line_xs, line_y_without_lowers, line_y_without_uppers, color=color, alpha=0.3
-        )
-        ax.set_title(ax_name)
+        plot_mean_and_std(ax, "with", label="with check_shapes")
+        plot_mean_and_std(ax, "without", label="without check_shapes")
         ax.set_ylabel("time / s")
-        ax.tick_params(axis="x", labelrotation=30)
         ax.legend()
 
         ax = axes[i][1]
-        (mean_line,) = ax.plot(line_xs, line_y_overhead_means)
-        color = mean_line.get_color()
-        ax.fill_between(
-            line_xs, line_y_overhead_lowers, line_y_overhead_uppers, color=color, alpha=0.3
-        )
-        ax.set_title(ax_name)
+        plot_mean_and_std(ax, "abs_overhead")
+        ax.set_ylabel("overhead / s")
+
+        ax = axes[i][2]
+        plot_mean_and_std(ax, "rel_overhead", scale=100.0)
         ax.set_ylabel("% overhead")
-        if np.min(line_y_overhead_lowers) >= 0:
-            ax.set_ylim(bottom=0.0)
-        ax.tick_params(axis="x", labelrotation=30)
 
     fig.tight_layout()
     fig.savefig(output_dir / "overhead.png")

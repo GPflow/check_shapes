@@ -8,7 +8,7 @@ on:
 
 env:
   penv: './poetryenv poetryenvs'
-  run: 'run python benchmark'
+  run: 'run python -m benchmark'
   bex: 'benchmark/examples'
   res: 'gh-pages/benchmark_results'
   plots: 'gh-pages/docs/benchmark_plots/'
@@ -35,15 +35,15 @@ jobs:
           ${penv}/torch_max install
       - name: Run benchmarks
         run: |
-          ${penv}/np_max ${run}/run_benchmark.py ${bex}/np_example.py ${res}
-          ${penv}/tf_max ${run}/run_benchmark.py ${bex}/tf_example.py ${res}
-          ${penv}/tf_max ${run}/run_benchmark.py ${bex}/tf_example.py --modifiers=no_compile ${res}
-          ${penv}/jax_max ${run}/run_benchmark.py ${bex}/jax_example.py ${res}
-          ${penv}/jax_max ${run}/run_benchmark.py ${bex}/jax_example.py --modifiers=no_jit ${res}
-          ${penv}/torch_max ${run}/run_benchmark.py ${bex}/torch_example.py ${res}
+          ${penv}/np_max ${run}.run_benchmark ${bex}/np_example.py ${res}
+          ${penv}/tf_max ${run}.run_benchmark ${bex}/tf_example.py ${res}
+          ${penv}/tf_max ${run}.run_benchmark ${bex}/tf_example.py --modifiers=no_compile ${res}
+          ${penv}/jax_max ${run}.run_benchmark ${bex}/jax_example.py ${res}
+          ${penv}/jax_max ${run}.run_benchmark ${bex}/jax_example.py --modifiers=no_jit ${res}
+          ${penv}/torch_max ${run}.run_benchmark ${bex}/torch_example.py ${res}
       - name: Plot benchmarks
         run: |
-          ${penv}/np_max ${run}/plot_benchmarks.py ${res}
+          ${penv}/np_max ${run}.plot_benchmarks ${res}
           mkdir -p ${plots}
           mv ${res}/overhead.png ${plots}
       - name: Commit new benchmark results
