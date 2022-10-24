@@ -1,0 +1,11 @@
+timestamp,script,modifiers,name,check_shapes,time_s
+2022-10-24 10:53:21.808428,np_example.py,,np_example,True,11.196072923000031
+2022-10-24 10:53:21.808428,np_example.py,,np_example,True,11.020053839999946
+2022-10-24 10:53:21.808428,np_example.py,,np_example,True,11.153975796000054
+2022-10-24 10:53:21.808428,np_example.py,,np_example,True,10.91666851900004
+2022-10-24 10:53:21.808428,np_example.py,,np_example,True,11.146121908000055
+2022-10-24 10:53:21.808428,np_example.py,,np_example,False,10.990479639
+2022-10-24 10:53:21.808428,np_example.py,,np_example,False,11.092653550000023
+2022-10-24 10:53:21.808428,np_example.py,,np_example,False,10.71681347099991
+2022-10-24 10:53:21.808428,np_example.py,,np_example,False,10.424686694000002
+2022-10-24 10:53:21.808428,np_example.py,,np_example,False,10.51721734199998
