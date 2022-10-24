@@ -21,6 +21,8 @@ from typing import List, NamedTuple, Sequence, Tuple
 
 import pandas as pd
 
+from .stats import Stats
+
 TIMESTAMP_FORMAT = "%Y%m%d_%H%M%S.%f"
 
 
@@ -42,6 +44,8 @@ _CHECK_SHAPES_MODIFIER = (
     Modifier(r"@inherit_check_shapes", ""),
     Modifier(r"@check_shapes\(.*?\)", ""),
     Modifier(r"cs\((.*?), \".*?\"\)", r"\1"),
+    Modifier(r"from check_shapes import \(.*?\)", ""),
+    Modifier(r"from check_shapes[^(]*?^", ""),
 )
 
 
@@ -52,12 +56,12 @@ _MODIFIERS = {
 
 
 def run_modified_script(
-    script: Path, modifiers: Modifiers, reps: int, keep: bool, output_dir: Path
+    script: Path, tmp_name: str, modifiers: Modifiers, reps: int, keep: bool, output_dir: Path
 ) -> Sequence[float]:
-    modified = output_dir / "tmp.py"
+    modified = output_dir / f"{tmp_name}.py"
     src = script.read_text()
     for modifier in modifiers:
-        src = re.sub(modifier.pattern, modifier.repl, src)
+        src = re.sub(modifier.pattern, modifier.repl, src, flags=re.MULTILINE + re.DOTALL)
     modified.write_text(src)
 
     timings = []
@@ -94,7 +98,7 @@ def run_benchmark(
     }
 
     modifiers = tuple(m for ms in modifier_strs for m in _MODIFIERS[ms])
-    with_timings = run_modified_script(script, modifiers, reps, keep, output_dir)
+    with_timings = run_modified_script(script, "with", modifiers, reps, keep, output_dir)
     with_df = pd.DataFrame(
         {
             **shared_data,
@@ -104,7 +108,7 @@ def run_benchmark(
     )
 
     modifiers = _CHECK_SHAPES_MODIFIER + modifiers
-    without_timings = run_modified_script(script, modifiers, reps, keep, output_dir)
+    without_timings = run_modified_script(script, "without", modifiers, reps, keep, output_dir)
     without_df = pd.DataFrame(
         {
             **shared_data,
@@ -116,6 +120,10 @@ def run_benchmark(
     print(df)
     csv_path = output_dir / f"results_{name}_{timestamp_str}.csv"
     df.to_csv(csv_path, index=False)
+
+    stats = Stats.new(df)
+    print(f"Relative overhead: {stats.rel_overhead_mean:.2%} +/- {stats.rel_overhead_std:.2%}")
+    print(f"Absolute overhead: {stats.abs_overhead_mean:.2}s +/- {stats.abs_overhead_std:.2}s")
 
 
 def main() -> None:
