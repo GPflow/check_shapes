@@ -1312,8 +1312,9 @@ Unable to parse shape specification.
     Argument number (0-indexed): 0
       Line:            "a [batch..., x]"
                            ^
+      Found unexpected character.
       Expected one of: "all"
-                       integer (re=(?:[0-9])+)
+                       <integer>
 """,
         ),
         (
@@ -1324,8 +1325,9 @@ Unable to parse shape specification.
     Argument number (0-indexed): 0
       Line:            "a= [batch..., x]"
                          ^
-      Expected one of: ":"
-                       "."
+      Found unexpected character.
+      Expected one of: "."
+                       ":"
                        "["
 """,
         ),
@@ -1337,6 +1339,7 @@ Unable to parse shape specification.
     Argument number (0-indexed): 0
       Line:     "a: (batch..., x)"
                     ^
+      Found unexpected character.
       Expected: "["
 """,
         ),
@@ -1348,6 +1351,7 @@ Unable to parse shape specification.
     Argument number (0-indexed): 0
       Line:     "a: batch..., x]"
                     ^
+      Found unexpected character.
       Expected: "["
 """,
         ),
@@ -1359,6 +1363,7 @@ Unable to parse shape specification.
     Argument number (0-indexed): 0
       Line:            "a: [batch... x]"
                                      ^
+      Found unexpected character.
       Expected one of: ","
                        "]"
 """,
@@ -1370,7 +1375,8 @@ Unable to parse shape specification.
   check_shapes called at: __check_shapes_path_and_line__
     Argument number (0-indexed): 0
       Line:            "a: [batch..., x"
-                                      ^
+                                       ^
+      Found unexpected end of input.
       Expected one of: ","
                        "..."
                        "]"
@@ -1384,14 +1390,15 @@ Unable to parse shape specification.
     Argument number (0-indexed): 0
       Line:            "a: [, x]"
                             ^
-      Expected one of: "broadcast"
-                       variable name (re=(?:(?:[A-Z]|[a-z])|_)(?:(?:(?:[A-Z]|[a-z])|[0-9]|_))*)
+      Found unexpected character.
+      Expected one of: "*"
                        "."
                        "..."
-                       integer (re=(?:[0-9])+)
                        "None"
                        "]"
-                       "*"
+                       "broadcast"
+                       <integer>
+                       <variable name>
 """,
         ),
         (
@@ -1401,7 +1408,7 @@ Unable to parse shape specification.
   check_shapes called at: __check_shapes_path_and_line__
     Argument number (0-indexed): 0
       Line: "a: [x] if b[all]"
-                        ^
+                         ^
       Argument references that evaluate to multiple values are not supported for boolean expressions.
 """,
         ),
@@ -1412,7 +1419,7 @@ Unable to parse shape specification.
   check_shapes called at: __check_shapes_path_and_line__
     Argument number (0-indexed): 0
       Line: "a: [x] if b.keys()"
-                        ^
+                         ^
       Argument references that evaluate to multiple values are not supported for boolean expressions.
 """,
         ),
@@ -1423,7 +1430,7 @@ Unable to parse shape specification.
   check_shapes called at: __check_shapes_path_and_line__
     Argument number (0-indexed): 0
       Line: "a: [x] if b.c[2].values()[3].d"
-                             ^
+                              ^
       Argument references that evaluate to multiple values are not supported for boolean expressions.
 """,
         ),
@@ -1435,8 +1442,9 @@ Unable to parse shape specification.
     Argument number (0-indexed): 0
       Line:            ""
                         ^
-      Expected one of: variable name (re=(?:(?:[A-Z]|[a-z])|_)(?:(?:(?:[A-Z]|[a-z])|[0-9]|_))*)
-                       "#"
+      Found unexpected end of input.
+      Expected one of: "#" <note>
+                       <variable name>
 """,
         ),
         (
@@ -1452,6 +1460,7 @@ Unable to parse shape specification.
     Argument number (0-indexed): 0
       Line:            "    x"
                             ^
+      Found unexpected character.
       Expected one of: ","
                        "]"
 """,
