@@ -1,0 +1,11 @@
+timestamp,script,modifiers,name,check_shapes,time_s
+2022-12-05 10:37:40.202474,tf_example.py,,tf_example,True,20.671592078999993
+2022-12-05 10:37:40.202474,tf_example.py,,tf_example,True,15.245547699999975
+2022-12-05 10:37:40.202474,tf_example.py,,tf_example,True,15.218941338000036
+2022-12-05 10:37:40.202474,tf_example.py,,tf_example,True,15.009265272999983
+2022-12-05 10:37:40.202474,tf_example.py,,tf_example,True,15.014968494999948
+2022-12-05 10:37:40.202474,tf_example.py,,tf_example,False,13.811077767000029
+2022-12-05 10:37:40.202474,tf_example.py,,tf_example,False,13.494123823999985
+2022-12-05 10:37:40.202474,tf_example.py,,tf_example,False,14.141698187999964
+2022-12-05 10:37:40.202474,tf_example.py,,tf_example,False,13.605893790999971
+2022-12-05 10:37:40.202474,tf_example.py,,tf_example,False,14.352620946999991
