@@ -1,0 +1,11 @@
+timestamp,script,modifiers,name,check_shapes,time_s
+2022-12-19 10:45:00.791107,torch_example.py,,torch_example,True,16.117411741999945
+2022-12-19 10:45:00.791107,torch_example.py,,torch_example,True,16.15733503299998
+2022-12-19 10:45:00.791107,torch_example.py,,torch_example,True,15.136783714999979
+2022-12-19 10:45:00.791107,torch_example.py,,torch_example,True,15.014490163000005
+2022-12-19 10:45:00.791107,torch_example.py,,torch_example,True,15.49932164400002
+2022-12-19 10:45:00.791107,torch_example.py,,torch_example,False,14.799180119000084
+2022-12-19 10:45:00.791107,torch_example.py,,torch_example,False,14.981827959000157
+2022-12-19 10:45:00.791107,torch_example.py,,torch_example,False,14.79266778200008
+2022-12-19 10:45:00.791107,torch_example.py,,torch_example,False,14.560933315000057
+2022-12-19 10:45:00.791107,torch_example.py,,torch_example,False,14.946624394000082
