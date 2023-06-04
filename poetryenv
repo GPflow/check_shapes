@@ -38,7 +38,7 @@ import subprocess
 import sys
 from contextlib import ExitStack, contextmanager
 from pathlib import Path
-from typing import Iterator, List
+from typing import Iterator, List, cast
 
 import tomlkit
 
@@ -48,6 +48,8 @@ _PYPROJECT_TOML = _ROOT_DIR / "pyproject.toml"
 _BACKUP_PYPROJECT_TOML = _BACKUP_DIR / _PYPROJECT_TOML.name
 _POETRY_LOCK = _ROOT_DIR / "poetry.lock"
 _VENV_DIR = _ROOT_DIR / ".venv"
+_MYPY_CACHE = _ROOT_DIR / ".mypy_cache"
+_PYTEST_CACHE = _ROOT_DIR / ".pytest_cache"
 
 
 @contextmanager
@@ -112,7 +114,7 @@ def _write_toml(data: tomlkit.TOMLDocument, path: Path) -> None:
 def _override_toml(root: tomlkit.TOMLDocument, overrides: tomlkit.TOMLDocument) -> None:
     for key, override_value in overrides.items():
         if (key in root) and (hasattr(root[key], "items")):
-            _override_toml(root[key], override_value)
+            _override_toml(cast(tomlkit.TOMLDocument, root[key]), override_value)
         else:
             root[key] = override_value
 
@@ -149,6 +151,8 @@ def poetryenv(root_env_dir: Path, recursive: bool, poetry_args: List[str]) -> in
             stack.enter_context(_shuffle(_PYPROJECT_TOML, env_dir, derived=False))
             stack.enter_context(_shuffle(_POETRY_LOCK, env_dir, derived=True))
             stack.enter_context(_shuffle(_VENV_DIR, env_dir, derived=True))
+            stack.enter_context(_shuffle(_MYPY_CACHE, env_dir, derived=True))
+            stack.enter_context(_shuffle(_PYTEST_CACHE, env_dir, derived=True))
 
             env_pyproject_overrides_toml = env_dir / "pyproject_overrides.toml"
             _update_pyproject_toml(env_pyproject_overrides_toml)
