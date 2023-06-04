@@ -24,7 +24,7 @@ jobs:
           path: gh-pages
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
       - name: Install
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
