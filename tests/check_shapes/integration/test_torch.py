@@ -108,6 +108,7 @@ def test_check_shapes() -> None:
             def step(weights: torch.Tensor) -> None:
                 loss(weights).backward()
                 with torch.no_grad():
+                    assert weights.grad is not None
                     weights -= LEARNING_RATE * weights.grad
                     weights.grad = None
 
