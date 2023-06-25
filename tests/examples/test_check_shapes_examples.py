@@ -31,12 +31,14 @@ from check_shapes import (
     check_shapes,
     disable_check_shapes,
     get_check_shapes,
+    get_drop_frames,
     get_enable_check_shapes,
     get_enable_function_call_precompute,
     get_rewrite_docstrings,
     get_shape,
     inherit_check_shapes,
     register_get_shape,
+    set_drop_frames,
     set_enable_check_shapes,
     set_enable_function_call_precompute,
     set_rewrite_docstrings,
@@ -756,7 +758,6 @@ def test_example__shape_checker__raw() -> None:
     linear_model(np.ones((4, 3)), np.ones((3,)))
 
 
-@requires_np
 def test_example__disable_function_call_precompute() -> None:
     def buggy_function() -> None:
         pass
@@ -824,9 +825,7 @@ def test_example__doc_rewrite() -> None:
     assert expected_doc == linear_model.__doc__
 
 
-@requires_np
 def test_example__doc_rewrite__disable() -> None:
-
     old_rewrite_docstrings = get_rewrite_docstrings()
 
     try:
@@ -878,3 +877,14 @@ def test_example__custom_type() -> None:
 
     model = LinearModel(np.ones((3,)))
     loss(model, np.ones((10, 3)), np.ones((10,)))
+
+
+def test_example__disable_drop_frames() -> None:
+    old_drop_frames = get_drop_frames()
+
+    try:
+        # [disable_drop_frames]
+        set_drop_frames(True)
+        # [disable_drop_frames]
+    finally:
+        set_drop_frames(old_drop_frames)

@@ -19,9 +19,11 @@ from _pytest.logging import LogCaptureFixture
 from check_shapes.config import (
     DocstringFormat,
     ShapeCheckingState,
+    get_drop_frames,
     get_enable_check_shapes,
     get_enable_function_call_precompute,
     get_rewrite_docstrings,
+    set_drop_frames,
     set_enable_check_shapes,
     set_enable_function_call_precompute,
     set_rewrite_docstrings,
@@ -46,10 +48,13 @@ def enable_shape_checks() -> Iterable[None]:
     old_enable = get_enable_check_shapes()
     old_rewrite_docstrings = get_rewrite_docstrings()
     old_function_call_precompute = get_enable_function_call_precompute()
+    old_drop_frames = get_drop_frames()
     set_enable_check_shapes(ShapeCheckingState.ENABLED)
     set_rewrite_docstrings(DocstringFormat.SPHINX)
     set_enable_function_call_precompute(True)
+    set_drop_frames(False)
     yield
+    set_drop_frames(old_drop_frames)
     set_enable_function_call_precompute(old_function_call_precompute)
     set_rewrite_docstrings(old_rewrite_docstrings)
     set_enable_check_shapes(old_enable)

@@ -21,9 +21,11 @@ from check_shapes.config import (
     _is_compiled_mode,
     add_is_compiled_mode,
     disable_check_shapes,
+    get_drop_frames,
     get_enable_check_shapes,
     get_enable_function_call_precompute,
     get_rewrite_docstrings,
+    set_drop_frames,
     set_enable_check_shapes,
     set_enable_function_call_precompute,
     set_rewrite_docstrings,
@@ -121,3 +123,15 @@ def test_get_set_rewrite_docstrings(
 def test_get_set_enable_function_call_precompute(enabled: bool, expected: bool) -> None:
     set_enable_function_call_precompute(enabled)
     assert expected == get_enable_function_call_precompute()
+
+
+@pytest.mark.parametrize(
+    "enabled,expected",
+    [
+        (True, True),
+        (False, False),
+    ],
+)
+def test_get_set_drop_frames(enabled: bool, expected: bool) -> None:
+    set_drop_frames(enabled)
+    assert expected == get_drop_frames()
