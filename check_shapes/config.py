@@ -16,21 +16,11 @@ Code for configuring check_shapes."
 """
 from contextlib import contextmanager
 from enum import Enum
-from typing import Callable, Iterator, List, Union
+from typing import Callable, ContextManager, Iterator, List, Union
+
+from dropstackframe import get_enable_drop_stack_frame, set_enable_drop_stack_frame
 
 IsCompiledMode = Callable[[], bool]
-
-
-_is_compiled_mode: List[IsCompiledMode] = []
-
-
-def add_is_compiled_mode(is_compiled_mode: IsCompiledMode) -> None:
-    """
-    Add a function for determining whether we are currently executing "compiled mode".
-
-    Used when func:`set_enable_check_shapes` is set to ``EAGER_MODE_ONLY``.
-    """
-    _is_compiled_mode.append(is_compiled_mode)
 
 
 class ShapeCheckingState(Enum):
@@ -67,9 +57,6 @@ class ShapeCheckingState(Enum):
             return False
 
 
-_enabled = ShapeCheckingState.EAGER_MODE_ONLY
-
-
 class DocstringFormat(Enum):
     """
     Enumeration of supported formats of docstrings.
@@ -86,9 +73,19 @@ class DocstringFormat(Enum):
     """
 
 
+_is_compiled_mode: List[IsCompiledMode] = []
+_enabled = ShapeCheckingState.EAGER_MODE_ONLY
 _docstring_format = DocstringFormat.SPHINX
-
 _function_call_precompute_enabled = False
+
+
+def add_is_compiled_mode(is_compiled_mode: IsCompiledMode) -> None:
+    """
+    Add a function for determining whether we are currently executing "compiled mode".
+
+    Used when func:`set_enable_check_shapes` is set to ``EAGER_MODE_ONLY``.
+    """
+    _is_compiled_mode.append(is_compiled_mode)
 
 
 def set_enable_check_shapes(enabled: Union[ShapeCheckingState, str, bool]) -> None:
@@ -192,3 +189,17 @@ def get_enable_function_call_precompute() -> bool:
     Get whether to precompute function call path and line numbers for debugging.
     """
     return _function_call_precompute_enabled
+
+
+def set_drop_frames(drop_frames: bool) -> ContextManager[None]:
+    """
+    Set whether :mod:`check_shapes` should hide itself from exception stack traces.
+    """
+    return set_enable_drop_stack_frame(drop_frames)
+
+
+def get_drop_frames() -> bool:
+    """
+    Get whether :mod:`check_shapes` should hide itself from exception stack traces.
+    """
+    return get_enable_drop_stack_frame()

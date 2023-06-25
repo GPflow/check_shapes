@@ -19,6 +19,8 @@ from abc import ABC, abstractmethod
 from functools import update_wrapper
 from typing import Any, Callable, Sequence, cast
 
+from dropstackframe import drop_stack_frame
+
 from .accessors import set_check_shapes
 from .argument_ref import RESULT_TOKEN
 from .base_types import C
@@ -117,7 +119,11 @@ def check_shapes(*specs: str, tf_decorator: bool = False) -> Callable[[C], C]:
 
         def wrapped_function(*args: Any, **kwargs: Any) -> Any:
             if not get_enable_check_shapes():
-                return func(*args, **kwargs)
+                try:
+                    return func(*args, **kwargs)
+                except Exception:
+                    drop_stack_frame()
+                    raise
 
             try:
                 bound_arguments = signature.bind(*args, **kwargs)
@@ -182,7 +188,11 @@ def check_shapes(*specs: str, tf_decorator: bool = False) -> Callable[[C], C]:
             _check_specs(pre_specs)
 
             with set_shape_checker(checker):
-                result = func(*args, **kwargs)
+                try:
+                    result = func(*args, **kwargs)
+                except Exception:
+                    drop_stack_frame()
+                    raise
             arg_map[RESULT_TOKEN] = result
 
             _check_specs(post_specs)
