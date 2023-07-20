@@ -15,6 +15,7 @@
 # pylint: disable=unused-argument  # Bunch of fake functions below has unused arguments.
 
 from dataclasses import dataclass
+from functools import partial
 from typing import Mapping, Optional, Sequence, Tuple
 
 import pytest
@@ -779,3 +780,18 @@ def test_check_shapes__rewrites_docstring() -> None:
         """
         == f.__doc__
     )
+
+
+def test_check_shapes__supports_partial() -> None:
+    def f(a: TestShaped, d: int) -> TestShaped:
+        return t(3, d)
+
+    shape_check = check_shapes(
+        "a: [10]",
+        "return: [3, 10]",
+    )
+    partial_f = shape_check(partial(f, d=10))
+
+    partial_f(t(10))
+    with pytest.raises(ShapeMismatchError):
+        partial_f(t(5))
