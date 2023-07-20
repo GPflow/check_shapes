@@ -323,7 +323,7 @@ class FunctionDefinitionContext(ErrorContext):
     func: Callable[..., Any]
 
     def print(self, builder: MessageBuilder) -> None:
-        name = self.func.__qualname__
+        name = getattr(self.func, "__qualname__", repr(self.func))
         try:
             path = inspect.getsourcefile(self.func)
         except Exception:  # pragma: no cover
