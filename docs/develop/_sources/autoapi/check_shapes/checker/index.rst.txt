@@ -14,6 +14,7 @@ Module Contents
 
 .. py:class:: _ObservedDim
 
+
    Storage of observed size of a single dimension variable.
 
    .. py:method:: check_and_update(actual, broadcast)
@@ -27,6 +28,7 @@ Module Contents
 
 
 .. py:class:: _ObservedDims
+
 
    Storage of observed sizes of a var-rank / batch variable.
 
@@ -42,6 +44,7 @@ Module Contents
 
 .. py:class:: _ShapeCheck
 
+
    A shape check that is waiting to be performed.
 
    .. py:property:: finished
@@ -51,7 +54,7 @@ Module Contents
 
 
    .. py:attribute:: actual
-      :annotation: :_Shape
+      :type: _Shape
 
       Actual observed shape.
 
@@ -60,7 +63,7 @@ Module Contents
 
 
    .. py:attribute:: expected
-      :annotation: :check_shapes.specs.ParsedShapeSpec
+      :type: check_shapes.specs.ParsedShapeSpec
 
       Specification to check against.
 
@@ -71,16 +74,17 @@ Module Contents
 
 .. py:class:: _VariableState
 
+
    Structure of stuff we need to know about each variable.
 
    .. py:attribute:: uses
-      :annotation: :List[Tuple[check_shapes.specs.ParsedTensorSpec, check_shapes.error_contexts.ErrorContext]]
+      :type: List[Tuple[check_shapes.specs.ParsedTensorSpec, check_shapes.error_contexts.ErrorContext]]
 
       List of specs where this variable is used. 
 
 
    .. py:attribute:: observed_dim
-      :annotation: :Optional[_ObservedDim]
+      :type: Optional[_ObservedDim]
 
       Observed size of this variable, if the variable is rank-1.
 
@@ -88,7 +92,7 @@ Module Contents
 
 
    .. py:attribute:: observed_dims
-      :annotation: :Optional[_ObservedDims]
+      :type: Optional[_ObservedDims]
 
       Observed shape of this variable, if the variable is varrank.
 
@@ -96,13 +100,14 @@ Module Contents
 
 
    .. py:attribute:: waiting_for_varrank
-      :annotation: :Set[_ShapeCheck]
+      :type: Set[_ShapeCheck]
 
       Checks that are waiting for the rank of this variable to be determined. 
 
 
 
 .. py:class:: ShapeChecker
+
 
    Mechanism for checking the shapes of tensors.
 

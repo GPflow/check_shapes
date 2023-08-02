@@ -14,6 +14,7 @@ Module Contents
 
 .. py:class:: ParsedBoolSpec
 
+
    Bases: :py:obj:`abc.ABC`
 
    A boolean expression. 
@@ -32,6 +33,7 @@ Module Contents
 
 .. py:class:: ParsedOrBoolSpec
 
+
    Bases: :py:obj:`ParsedBoolSpec`
 
    An "or" expression. 
@@ -48,6 +50,7 @@ Module Contents
 
 
 .. py:class:: ParsedAndBoolSpec
+
 
    Bases: :py:obj:`ParsedBoolSpec`
 
@@ -66,6 +69,7 @@ Module Contents
 
 .. py:class:: ParsedNotBoolSpec
 
+
    Bases: :py:obj:`ParsedBoolSpec`
 
    A "not" expression. 
@@ -83,12 +87,14 @@ Module Contents
 
 .. py:class:: BoolTest
 
+
    Bases: :py:obj:`enum.Enum`
 
    Strategies for converting a value to ``bool``.
 
 
 .. py:class:: ParsedArgumentRefBoolSpec
+
 
    Bases: :py:obj:`ParsedBoolSpec`
 

@@ -111,7 +111,7 @@ again.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="check_shapes.checker._ShapeCheck.actual">
-<span class="sig-name descname"><span class="pre">actual</span></span><em class="property"><span class="w"> </span><span class="pre">:_Shape</span></em><a class="headerlink" href="#check_shapes.checker._ShapeCheck.actual" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">actual</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_Shape</span></em><a class="headerlink" href="#check_shapes.checker._ShapeCheck.actual" title="Permalink to this definition">¶</a></dt>
 <dd><p>Actual observed shape.</p>
 <p>Only <cite>actual[actual_begin:actual_end]</cite> is still waiting to be checked. The beginning and end may
 already have been checked.</p>
@@ -119,7 +119,7 @@ already have been checked.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="check_shapes.checker._ShapeCheck.expected">
-<span class="sig-name descname"><span class="pre">expected</span></span><em class="property"><span class="w"> </span><span class="pre">:check_shapes.specs.ParsedShapeSpec</span></em><a class="headerlink" href="#check_shapes.checker._ShapeCheck.expected" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">expected</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">check_shapes.specs.ParsedShapeSpec</span></em><a class="headerlink" href="#check_shapes.checker._ShapeCheck.expected" title="Permalink to this definition">¶</a></dt>
 <dd><p>Specification to check against.</p>
 <p>Only <cite>expected[expected_begin:expected_end]</cite> is still waiting to be checked. The beginning and
 end may already have been checked.</p>
@@ -133,27 +133,27 @@ end may already have been checked.</p>
 <dd><p>Structure of stuff we need to know about each variable.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="check_shapes.checker._VariableState.uses">
-<span class="sig-name descname"><span class="pre">uses</span></span><em class="property"><span class="w"> </span><span class="pre">:List[Tuple[check_shapes.specs.ParsedTensorSpec,</span> <span class="pre">check_shapes.error_contexts.ErrorContext]]</span></em><a class="headerlink" href="#check_shapes.checker._VariableState.uses" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">uses</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">check_shapes.specs.ParsedTensorSpec</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../error_contexts/index.html#check_shapes.error_contexts.ErrorContext" title="check_shapes.error_contexts.ErrorContext"><span class="pre">check_shapes.error_contexts.ErrorContext</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#check_shapes.checker._VariableState.uses" title="Permalink to this definition">¶</a></dt>
 <dd><p>List of specs where this variable is used.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="check_shapes.checker._VariableState.observed_dim">
-<span class="sig-name descname"><span class="pre">observed_dim</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[_ObservedDim]</span></em><a class="headerlink" href="#check_shapes.checker._VariableState.observed_dim" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">observed_dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#check_shapes.checker._ObservedDim" title="check_shapes.checker._ObservedDim"><span class="pre">_ObservedDim</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#check_shapes.checker._VariableState.observed_dim" title="Permalink to this definition">¶</a></dt>
 <dd><p>Observed size of this variable, if the variable is rank-1.</p>
 <p>Set this <cite>None</cite> if this variable is varrank.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="check_shapes.checker._VariableState.observed_dims">
-<span class="sig-name descname"><span class="pre">observed_dims</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[_ObservedDims]</span></em><a class="headerlink" href="#check_shapes.checker._VariableState.observed_dims" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">observed_dims</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#check_shapes.checker._ObservedDims" title="check_shapes.checker._ObservedDims"><span class="pre">_ObservedDims</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#check_shapes.checker._VariableState.observed_dims" title="Permalink to this definition">¶</a></dt>
 <dd><p>Observed shape of this variable, if the variable is varrank.</p>
 <p>Set this <cite>None</cite> if this variable is rank-1.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="check_shapes.checker._VariableState.waiting_for_varrank">
-<span class="sig-name descname"><span class="pre">waiting_for_varrank</span></span><em class="property"><span class="w"> </span><span class="pre">:Set[_ShapeCheck]</span></em><a class="headerlink" href="#check_shapes.checker._VariableState.waiting_for_varrank" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">waiting_for_varrank</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#check_shapes.checker._ShapeCheck" title="check_shapes.checker._ShapeCheck"><span class="pre">_ShapeCheck</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#check_shapes.checker._VariableState.waiting_for_varrank" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks that are waiting for the rank of this variable to be determined.</p>
 </dd></dl>
 
@@ -371,8 +371,8 @@ be added to <code class="docutils literal notranslate"><span class="pre">shape_c
       &copy;2022, The GPflow Contributors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.2.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |
       <a href="../../../_sources/autoapi/check_shapes/checker/index.rst.txt"

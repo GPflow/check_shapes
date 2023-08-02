@@ -13,7 +13,6 @@ Module Contents
 ---------------
 
 .. py:data:: Dimension
-   
 
    The size of a single observed dimension.
 
@@ -21,7 +20,6 @@ Module Contents
 
 
 .. py:data:: Shape
-   
 
    The complete shape of an observed object.
 

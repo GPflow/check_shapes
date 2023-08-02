@@ -307,13 +307,13 @@ messages.</p></li>
 <p>Enumeration of supported formats of docstrings.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="check_shapes.DocstringFormat.SPHINX">
-<span class="sig-name descname"><span class="pre">SPHINX</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">sphinx</span></em><a class="headerlink" href="#check_shapes.DocstringFormat.SPHINX" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">SPHINX</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sphinx'</span></em><a class="headerlink" href="#check_shapes.DocstringFormat.SPHINX" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rewrite docstrings in the <a class="reference external" href="https://www.sphinx-doc.org/en/master/">Sphinx</a> format.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="check_shapes.DocstringFormat.NONE">
-<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">none</span></em><a class="headerlink" href="#check_shapes.DocstringFormat.NONE" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'none'</span></em><a class="headerlink" href="#check_shapes.DocstringFormat.NONE" title="Permalink to this definition">¶</a></dt>
 <dd><p>Do not rewrite docstrings.</p>
 </dd></dl>
 
@@ -326,19 +326,19 @@ messages.</p></li>
 <p>Different states of whether to actually check shapes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="check_shapes.ShapeCheckingState.ENABLED">
-<span class="sig-name descname"><span class="pre">ENABLED</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">enabled</span></em><a class="headerlink" href="#check_shapes.ShapeCheckingState.ENABLED" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ENABLED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'enabled'</span></em><a class="headerlink" href="#check_shapes.ShapeCheckingState.ENABLED" title="Permalink to this definition">¶</a></dt>
 <dd><p>Always check shapes.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="check_shapes.ShapeCheckingState.EAGER_MODE_ONLY">
-<span class="sig-name descname"><span class="pre">EAGER_MODE_ONLY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">eager_mode_only</span></em><a class="headerlink" href="#check_shapes.ShapeCheckingState.EAGER_MODE_ONLY" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">EAGER_MODE_ONLY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'eager_mode_only'</span></em><a class="headerlink" href="#check_shapes.ShapeCheckingState.EAGER_MODE_ONLY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Only check shapes if <cite>tf.inside_function()</cite> is <cite>False</cite>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="check_shapes.ShapeCheckingState.DISABLED">
-<span class="sig-name descname"><span class="pre">DISABLED</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">disabled</span></em><a class="headerlink" href="#check_shapes.ShapeCheckingState.DISABLED" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">DISABLED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'disabled'</span></em><a class="headerlink" href="#check_shapes.ShapeCheckingState.DISABLED" title="Permalink to this definition">¶</a></dt>
 <dd><p>Never check shapes.</p>
 </dd></dl>
 
@@ -374,6 +374,17 @@ messages.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="check_shapes.get_drop_frames">
+<span class="sig-prename descclassname"><span class="pre">check_shapes.</span></span><span class="sig-name descname"><span class="pre">get_drop_frames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#check_shapes.get_drop_frames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get whether <a class="reference internal" href="#module-check_shapes" title="check_shapes"><code class="xref py py-mod docutils literal notranslate"><span class="pre">check_shapes</span></code></a> should hide itself from exception stack traces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="check_shapes.get_enable_check_shapes">
 <span class="sig-prename descclassname"><span class="pre">check_shapes.</span></span><span class="sig-name descname"><span class="pre">get_enable_check_shapes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#check_shapes.get_enable_check_shapes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get whether to enable <a class="reference internal" href="#module-check_shapes" title="check_shapes"><code class="xref py py-mod docutils literal notranslate"><span class="pre">check_shapes</span></code></a>.</p>
@@ -402,6 +413,20 @@ messages.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#check_shapes.DocstringFormat" title="check_shapes.DocstringFormat">DocstringFormat</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="check_shapes.set_drop_frames">
+<span class="sig-prename descclassname"><span class="pre">check_shapes.</span></span><span class="sig-name descname"><span class="pre">set_drop_frames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drop_frames</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#check_shapes.set_drop_frames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set whether <a class="reference internal" href="#module-check_shapes" title="check_shapes"><code class="xref py py-mod docutils literal notranslate"><span class="pre">check_shapes</span></code></a> should hide itself from exception stack traces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>drop_frames</strong> (<em>bool</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ContextManager[None]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -706,8 +731,8 @@ super-class.</p>
       &copy;2022, The GPflow Contributors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.2.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |
       <a href="../../_sources/autoapi/check_shapes/index.rst.txt"

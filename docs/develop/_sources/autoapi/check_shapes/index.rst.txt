@@ -41,7 +41,6 @@ Package Contents
 
 
 .. py:data:: Dimension
-   
 
    The size of a single observed dimension.
 
@@ -49,7 +48,6 @@ Package Contents
 
 
 .. py:data:: Shape
-   
 
    The complete shape of an observed object.
 
@@ -59,6 +57,7 @@ Package Contents
 
 
 .. py:class:: ShapeChecker
+
 
    Mechanism for checking the shapes of tensors.
 
@@ -173,18 +172,19 @@ Package Contents
 
 .. py:class:: DocstringFormat
 
+
    Bases: :py:obj:`enum.Enum`
 
    Enumeration of supported formats of docstrings.
 
    .. py:attribute:: SPHINX
-      :annotation: = sphinx
+      :value: 'sphinx'
 
       Rewrite docstrings in the `Sphinx <https://www.sphinx-doc.org/en/master/>`_ format.
 
 
    .. py:attribute:: NONE
-      :annotation: = none
+      :value: 'none'
 
       Do not rewrite docstrings.
 
@@ -192,24 +192,25 @@ Package Contents
 
 .. py:class:: ShapeCheckingState
 
+
    Bases: :py:obj:`enum.Enum`
 
    Different states of whether to actually check shapes.
 
    .. py:attribute:: ENABLED
-      :annotation: = enabled
+      :value: 'enabled'
 
       Always check shapes.
 
 
    .. py:attribute:: EAGER_MODE_ONLY
-      :annotation: = eager_mode_only
+      :value: 'eager_mode_only'
 
       Only check shapes if `tf.inside_function()` is `False`.
 
 
    .. py:attribute:: DISABLED
-      :annotation: = disabled
+      :value: 'disabled'
 
       Never check shapes.
 
@@ -232,6 +233,11 @@ Package Contents
       :dedent:
 
 
+.. py:function:: get_drop_frames()
+
+   Get whether :mod:`check_shapes` should hide itself from exception stack traces.
+
+
 .. py:function:: get_enable_check_shapes()
 
    Get whether to enable :mod:`check_shapes`.
@@ -245,6 +251,11 @@ Package Contents
 .. py:function:: get_rewrite_docstrings()
 
    Get how :mod:`check_shapes` should rewrite docstrings.
+
+
+.. py:function:: set_drop_frames(drop_frames)
+
+   Set whether :mod:`check_shapes` should hide itself from exception stack traces.
 
 
 .. py:function:: set_enable_check_shapes(enabled)
@@ -305,6 +316,7 @@ Package Contents
 
 
 .. py:class:: ErrorContext
+
 
    Bases: :py:obj:`abc.ABC`
 

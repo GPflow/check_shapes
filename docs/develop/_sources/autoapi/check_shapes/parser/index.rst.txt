@@ -21,6 +21,7 @@ Module Contents
 
 .. py:class:: _TreeVisitor
 
+
    Bases: :py:obj:`abc.ABC`
 
    Functionality for visiting the nodes of parse-trees.
@@ -35,6 +36,7 @@ Module Contents
 
 .. py:class:: _ParseSpec(source)
 
+
    Bases: :py:obj:`_TreeVisitor`
 
    Functionality for visiting the nodes of parse-trees.
@@ -48,6 +50,7 @@ Module Contents
 
 
 .. py:class:: _RewritedocString(source, function_spec)
+
 
    Bases: :py:obj:`_TreeVisitor`
 
@@ -69,6 +72,7 @@ Module Contents
 
 
 .. py:class:: _CachedParser(grammar_filename, start_symbol, parser_name, re_terminal_descriptions, transformer_class, exception_class)
+
 
    Small wrapper around Lark so that we can reuse as much code as possible between the different
    things we parse.

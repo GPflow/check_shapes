@@ -495,3 +495,19 @@ your type:
    :start-after: [custom_type]
    :end-before: [custom_type]
    :dedent:
+
+
+`check_shapes` in stack traces
+++++++++++++++++++++++++++++++
+
+If you use :mod:`check_shapes` consistently you will have a lot of functions wrapped in
+:func:`check_shapes`. This means that if you have an error many of the stack frames in the trace
+back would belong to :mod:`check_shapes`. For the sake of more readable error messages
+:mod:`check_shapes` has code to hide itself from trace backs. If you do not like this you can
+disable this behaviour with :func:`set_drop_frames`:
+
+
+.. literalinclude:: /examples/test_check_shapes_examples.py
+   :start-after: [disable_drop_frames]
+   :end-before: [disable_drop_frames]
+   :dedent:
