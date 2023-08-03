@@ -458,7 +458,7 @@ files = [
 name = "dropstackframe"
 version = "0.1.0"
 description = "A python package for removing stack frames from stack traces."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
@@ -2519,4 +2519,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "3.11.*"
-content-hash = "2bbbcca91650710a9fc751b30ba706335bdaca4f9108a741ae0a6b7c4480b360"
+content-hash = "d5b9a77e053add40afd3e5e85c27d6c9a385a60f0dcbb340b968c674890a263f"
