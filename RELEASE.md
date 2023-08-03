@@ -33,7 +33,7 @@ This release contains contributions from:
 <INSERT>, <NAME>, <HERE>, <USING>, <GITHUB>, <HANDLE>
 
 
-# Release 1.0.1 (next upcoming release in progress)
+# Release 1.1.1 (next upcoming release in progress)
 
 <INSERT SMALL BLURB ABOUT RELEASE FOCUS AREA AND POTENTIAL TOOLCHAIN CHANGES>
 
@@ -64,6 +64,28 @@ This release contains contributions from:
 This release contains contributions from:
 
 <INSERT>, <NAME>, <HERE>, <USING>, <GITHUB>, <HANDLE>
+
+
+# Release 1.1.0
+
+Maintenance release. Mostly importantly adds support for Python 3.11, but also adds a couple of
+small features.
+
+## Major Features and Improvements
+
+* Adds support for:
+  - Python 3.11
+  - PyTorch 2.0
+  - TensorFlow 2.12
+  - JAX 0.4
+* Adds support for annotating `functools.partial` functions.
+* Hides `check_shapes` stack frames from stack traces, to be less spammy.
+
+## Thanks to our Contributors
+
+This release contains contributions from:
+
+jesnie, uri-granta
 
 
 # Release 1.0.0

@@ -473,7 +473,9 @@ class ShapeChecker:
         else:
             self._assert(unallocated_len >= 0)
             if n_unknown == 1:
-                (expected_name,) = unknown_len_variables
+                (  # pylint: disable=unbalanced-dict-unpacking
+                    expected_name,
+                ) = unknown_len_variables
                 if expected_name is not None:
                     broadcastable = unknown_len_variables[expected_name]
                     if n_allocated_none <= 1 or (not broadcastable):

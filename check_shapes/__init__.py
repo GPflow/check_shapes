@@ -22,9 +22,11 @@ from .config import (
     DocstringFormat,
     ShapeCheckingState,
     disable_check_shapes,
+    get_drop_frames,
     get_enable_check_shapes,
     get_enable_function_call_precompute,
     get_rewrite_docstrings,
+    set_drop_frames,
     set_enable_check_shapes,
     set_enable_function_call_precompute,
     set_rewrite_docstrings,
@@ -41,7 +43,7 @@ install_tf_integration()
 install_tfp_integration()
 install_torch_integration()
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 __all__ = [
     "Dimension",
@@ -64,6 +66,7 @@ __all__ = [
     "error_contexts",
     "exceptions",
     "get_check_shapes",
+    "get_drop_frames",
     "get_enable_check_shapes",
     "get_enable_function_call_precompute",
     "get_rewrite_docstrings",
@@ -73,6 +76,7 @@ __all__ = [
     "inheritance",
     "parser",
     "register_get_shape",
+    "set_drop_frames",
     "set_enable_check_shapes",
     "set_enable_function_call_precompute",
     "set_rewrite_docstrings",

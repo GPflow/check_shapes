@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.7"
       - run: curl -sSL https://install.python-poetry.org | python3 -
       - run: poetry install
       - run: poetry run task test
@@ -29,7 +29,7 @@ jobs:
           - version: "min"
             python: "3.7"
           - version: "max"
-            python: "3.10"
+            python: "3.11"
 
     name: test-${{ matrix.framework }}-${{ matrix.version }}
     steps:
@@ -60,7 +60,7 @@ jobs:
           path: gh-pages
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.7"
       - run: curl -sSL https://install.python-poetry.org | python3 -
       - run: poetry install
       - run: poetry run task docs
@@ -84,7 +84,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.7"
       - run: curl -sSL https://install.python-poetry.org | python3 -
       - run: poetry build
       - run: poetry publish -u __token__ -p ${{ secrets.CHECK_SHAPES_PYPI_TOKEN }}

@@ -7,7 +7,7 @@
 
 2. Update [RELEASE.md](https://github.com/GPflow/check_shapes/blob/develop/RELEASE.md).
    - Make sure it contains up-to-date release notes for the next release.
-     * They should cover all changes, that are visible to library users on the `develop` branch
+     * They should cover all changes that are visible to library users on the `develop` branch
        since the most recent release.
      * They should make clear to users whether they might benefit from this release and what
        backwards incompatibilities they might face.

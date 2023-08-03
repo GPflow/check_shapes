@@ -1,4 +1,10 @@
 [tool.poetry.dependencies]
-python = "3.10.*"
-tensorflow = "2.10.*"
-tensorflow-probability = "0.18.*"
+python = "3.11.*"
+tensorflow = "2.12.*"
+tensorflow-probability = "0.20.*"
+
+[tool.poetry.dev-dependencies]
+numpy = "1.*.*"
+
+[tool.mypy]
+python_version = "3.11"

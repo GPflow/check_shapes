@@ -1,3 +1,9 @@
 [tool.poetry.dependencies]
-python = "3.10.*"
-jax = { version = "0.3.*", extras = ["cpu"] }
+python = "3.11.*"
+jax = { version = "0.4.*", extras = ["cpu"] }
+
+[tool.poetry.dev-dependencies]
+numpy = "1.*.*"
+
+[tool.mypy]
+python_version = "3.11"

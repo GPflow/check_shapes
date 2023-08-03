@@ -151,7 +151,7 @@ def evaluate(model: Model, data: TestData) -> Mapping[str, float]:
     test_predictions = model.predict(data.test_features)
     err = data.test_targets - test_predictions
     result = {}
-    result["rmse"] = jnp.sqrt(jnp.mean(err ** 2))
+    result["rmse"] = float(jnp.sqrt(jnp.mean(err ** 2)))
     return result
 
 

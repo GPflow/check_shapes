@@ -68,7 +68,8 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
-disable=comparison-with-callable,
+disable=bad-option-value,
+        comparison-with-callable,
         disallowed-name,
         duplicate-code,
         fixme,
@@ -85,15 +86,18 @@ disable=comparison-with-callable,
         too-few-public-methods,
         too-many-arguments,
         too-many-branches,
+        too-many-instance-attributes,
         too-many-lines,
         too-many-locals,
         too-many-public-methods,
         too-many-statements,
         unexpected-keyword-arg,
         unidiomatic-typecheck,
+        unknown-option-value,
         unnecessary-lambda-assignment,
         unsubscriptable-object,
         unused-argument,
+        useless-option-value,
         wrong-import-order,
         wrong-import-position,
 
