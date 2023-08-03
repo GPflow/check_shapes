@@ -23,12 +23,12 @@ Module Contents
 ---------------
 
 .. py:data:: _NO_VALUE
-   
 
    Sentinel to represent "no value" in places where ``None`` is a valid value.
 
 
 .. py:class:: MessageBuilder(indent_str = '')
+
 
    Utility for formatting nested text.
 
@@ -59,6 +59,7 @@ Module Contents
 
 .. py:class:: ErrorContext
 
+
    Bases: :py:obj:`abc.ABC`
 
    A context in which an error can occur.
@@ -80,6 +81,7 @@ Module Contents
 
 .. py:class:: StackContext
 
+
    Bases: :py:obj:`ErrorContext`
 
    Error context where one context is "inside" another one.
@@ -92,6 +94,7 @@ Module Contents
 
 .. py:class:: ParallelContext
 
+
    Bases: :py:obj:`ErrorContext`
 
    Error context with many contexts in parallel.
@@ -103,6 +106,7 @@ Module Contents
 
 
 .. py:class:: FunctionCallContext
+
 
    Bases: :py:obj:`ErrorContext`
 
@@ -129,6 +133,7 @@ Module Contents
 
 .. py:class:: FunctionDefinitionContext
 
+
    Bases: :py:obj:`ErrorContext`
 
    An error occured in the context of a function definition.
@@ -140,6 +145,7 @@ Module Contents
 
 
 .. py:class:: VariableContext
+
 
    Bases: :py:obj:`ErrorContext`
 
@@ -153,6 +159,7 @@ Module Contents
 
 .. py:class:: TensorSpecContext
 
+
    Bases: :py:obj:`ErrorContext`
 
    An error occurred in the context of a tensor specification.
@@ -164,6 +171,7 @@ Module Contents
 
 
 .. py:class:: ArgumentContext
+
 
    Bases: :py:obj:`ErrorContext`
 
@@ -187,6 +195,7 @@ Module Contents
 
 .. py:class:: AttributeContext
 
+
    Bases: :py:obj:`ErrorContext`
 
    An error occurred in the context of an attribute on an object.
@@ -208,6 +217,7 @@ Module Contents
 
 
 .. py:class:: IndexContext
+
 
    Bases: :py:obj:`ErrorContext`
 
@@ -231,6 +241,7 @@ Module Contents
 
 .. py:class:: MappingKeyContext
 
+
    Bases: :py:obj:`ErrorContext`
 
    An error occurent in the context of a key in a map.
@@ -252,6 +263,7 @@ Module Contents
 
 
 .. py:class:: MappingValueContext
+
 
    Bases: :py:obj:`ErrorContext`
 
@@ -275,6 +287,7 @@ Module Contents
 
 .. py:class:: ConditionContext
 
+
    Bases: :py:obj:`ErrorContext`
 
    An error occurred in a conditional context.
@@ -286,6 +299,7 @@ Module Contents
 
 
 .. py:class:: ShapeContext
+
 
    Bases: :py:obj:`ErrorContext`
 
@@ -299,6 +313,7 @@ Module Contents
 
 .. py:class:: NoteContext
 
+
    Bases: :py:obj:`ErrorContext`
 
    An error occurred in a context where a user has added a note.
@@ -310,6 +325,7 @@ Module Contents
 
 
 .. py:class:: ObjectValueContext
+
 
    Bases: :py:obj:`ErrorContext`
 
@@ -333,6 +349,7 @@ Module Contents
 
 .. py:class:: ObjectTypeContext
 
+
    Bases: :py:obj:`ErrorContext`
 
    An error was caused by the type of an object.
@@ -355,12 +372,14 @@ Module Contents
 
 .. py:class:: ParserInputContext
 
+
    Bases: :py:obj:`ErrorContext`, :py:obj:`abc.ABC`
 
    Abstract base class for contexts that relate to parser input.
 
 
 .. py:class:: LarkUnexpectedInputContext
+
 
    Bases: :py:obj:`ParserInputContext`
 
@@ -378,6 +397,7 @@ Module Contents
 
 
 .. py:class:: MultipleElementBoolContext
+
 
    Bases: :py:obj:`ParserInputContext`
 

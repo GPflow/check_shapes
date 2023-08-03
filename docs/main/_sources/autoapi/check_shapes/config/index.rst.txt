@@ -12,33 +12,27 @@
 Module Contents
 ---------------
 
-.. py:function:: add_is_compiled_mode(is_compiled_mode)
-
-   Add a function for determining whether we are currently executing "compiled mode".
-
-   Used when func:`set_enable_check_shapes` is set to ``EAGER_MODE_ONLY``.
-
-
 .. py:class:: ShapeCheckingState
+
 
    Bases: :py:obj:`enum.Enum`
 
    Different states of whether to actually check shapes.
 
    .. py:attribute:: ENABLED
-      :annotation: = enabled
+      :value: 'enabled'
 
       Always check shapes.
 
 
    .. py:attribute:: EAGER_MODE_ONLY
-      :annotation: = eager_mode_only
+      :value: 'eager_mode_only'
 
       Only check shapes if `tf.inside_function()` is `False`.
 
 
    .. py:attribute:: DISABLED
-      :annotation: = disabled
+      :value: 'disabled'
 
       Never check shapes.
 
@@ -51,21 +45,29 @@ Module Contents
 
 .. py:class:: DocstringFormat
 
+
    Bases: :py:obj:`enum.Enum`
 
    Enumeration of supported formats of docstrings.
 
    .. py:attribute:: SPHINX
-      :annotation: = sphinx
+      :value: 'sphinx'
 
       Rewrite docstrings in the `Sphinx <https://www.sphinx-doc.org/en/master/>`_ format.
 
 
    .. py:attribute:: NONE
-      :annotation: = none
+      :value: 'none'
 
       Do not rewrite docstrings.
 
+
+
+.. py:function:: add_is_compiled_mode(is_compiled_mode)
+
+   Add a function for determining whether we are currently executing "compiled mode".
+
+   Used when func:`set_enable_check_shapes` is set to ``EAGER_MODE_ONLY``.
 
 
 .. py:function:: set_enable_check_shapes(enabled)
@@ -132,5 +134,15 @@ Module Contents
 .. py:function:: get_enable_function_call_precompute()
 
    Get whether to precompute function call path and line numbers for debugging.
+
+
+.. py:function:: set_drop_frames(drop_frames)
+
+   Set whether :mod:`check_shapes` should hide itself from exception stack traces.
+
+
+.. py:function:: get_drop_frames()
+
+   Get whether :mod:`check_shapes` should hide itself from exception stack traces.
 
 

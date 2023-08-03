@@ -29,6 +29,7 @@ Module Contents
 
 .. py:class:: _InheritCheckShapes(func)
 
+
    Implementation of inherit_check_shapes.
 
    The ``__set_name__`` hack is to get access to the class the method was declared on.
