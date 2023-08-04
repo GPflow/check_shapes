@@ -33,7 +33,7 @@ This release contains contributions from:
 <INSERT>, <NAME>, <HERE>, <USING>, <GITHUB>, <HANDLE>
 
 
-# Release 1.1.1 (next upcoming release in progress)
+# Release 1.1.2 (next upcoming release in progress)
 
 <INSERT SMALL BLURB ABOUT RELEASE FOCUS AREA AND POTENTIAL TOOLCHAIN CHANGES>
 
@@ -64,6 +64,21 @@ This release contains contributions from:
 This release contains contributions from:
 
 <INSERT>, <NAME>, <HERE>, <USING>, <GITHUB>, <HANDLE>
+
+
+# Release 1.1.1
+
+Fix missing dependency in `1.1.0`.
+
+## Bug Fixes and Other Changes
+
+* Fix missing dependency on `dropstackframe`.
+
+## Thanks to our Contributors
+
+This release contains contributions from:
+
+jesnie
 
 
 # Release 1.1.0
