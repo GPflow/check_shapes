@@ -19,6 +19,17 @@ jobs:
       - run: poetry install
       - run: poetry run task test
 
+  test-install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.7"
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: poetry install --only main
+      - run: poetry run python -c "import check_shapes"
+
   test-versions:
     runs-on: ubuntu-latest
     strategy:
@@ -43,7 +54,7 @@ jobs:
       - run: ./poetryenv poetryenvs/${{ matrix.framework }}_${{ matrix.version }} run task test
 
   all-tests:
-    needs: [test-base, test-versions]
+    needs: [test-base, test-install, test-versions]
     runs-on: ubuntu-latest
     steps:
       - run: echo ok

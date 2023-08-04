@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "check_shapes"
-version = "1.1.0"
+version = "1.1.1"
 description = "A library for annotating and checking the shapes of tensors."
 authors = [
     "Jesper Nielsen <jespernielsen1982+check_shapes@gmail.com>",
@@ -32,6 +32,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
+dropstackframe = ">=0.1.0"
 lark = "^1.1.0"
 python = "^3.7"
 
@@ -39,7 +40,6 @@ python = "^3.7"
 Sphinx = "^5.2.2"
 black = "20.8b1"  # Pinned for backwards compatibility with the old stuff.
 click = "<8.1.0"  # Required by `black = "20.8b1"`.
-dropstackframe = ">=0.1.0"
 isort = "^5.10.0"
 matplotlib = "^3.0.0"
 mypy = ">0.920,!=0.982"

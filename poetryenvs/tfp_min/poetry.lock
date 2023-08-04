@@ -397,7 +397,7 @@ files = [
 name = "dropstackframe"
 version = "0.1.0"
 description = "A python package for removing stack frames from stack traces."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
@@ -2265,4 +2265,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "3.7.*"
-content-hash = "f332b4d7ec1159662c052949678ee16aeca8773daa161fd19bc4c148fb92c5b3"
+content-hash = "1454067566672d60c60a3c8338172ccad792c25c7f3c9f926fc12be0955f91d0"
