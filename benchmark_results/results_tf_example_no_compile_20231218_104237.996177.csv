@@ -1,0 +1,11 @@
+timestamp,script,modifiers,name,check_shapes,time_s
+2023-12-18 10:42:37.996177,tf_example.py,no_compile,tf_example_no_compile,True,13.738283918999969
+2023-12-18 10:42:37.996177,tf_example.py,no_compile,tf_example_no_compile,True,13.92053594999993
+2023-12-18 10:42:37.996177,tf_example.py,no_compile,tf_example_no_compile,True,13.636417644999938
+2023-12-18 10:42:37.996177,tf_example.py,no_compile,tf_example_no_compile,True,13.746409599999993
+2023-12-18 10:42:37.996177,tf_example.py,no_compile,tf_example_no_compile,True,13.622354900999994
+2023-12-18 10:42:37.996177,tf_example.py,no_compile,tf_example_no_compile,False,13.233109661999947
+2023-12-18 10:42:37.996177,tf_example.py,no_compile,tf_example_no_compile,False,13.100709467000001
+2023-12-18 10:42:37.996177,tf_example.py,no_compile,tf_example_no_compile,False,13.041887583000062
+2023-12-18 10:42:37.996177,tf_example.py,no_compile,tf_example_no_compile,False,12.996446164999952
+2023-12-18 10:42:37.996177,tf_example.py,no_compile,tf_example_no_compile,False,13.137282788999983
