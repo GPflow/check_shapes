@@ -1,0 +1,11 @@
+timestamp,script,modifiers,name,check_shapes,time_s
+2024-09-02 10:46:28.054346,jax_example.py,,jax_example,True,7.0582003009999426
+2024-09-02 10:46:28.054346,jax_example.py,,jax_example,True,6.132355974999882
+2024-09-02 10:46:28.054346,jax_example.py,,jax_example,True,6.123338790999924
+2024-09-02 10:46:28.054346,jax_example.py,,jax_example,True,6.193868709000071
+2024-09-02 10:46:28.054346,jax_example.py,,jax_example,True,6.187656709999828
+2024-09-02 10:46:28.054346,jax_example.py,,jax_example,False,6.015448664000132
+2024-09-02 10:46:28.054346,jax_example.py,,jax_example,False,6.123017593000213
+2024-09-02 10:46:28.054346,jax_example.py,,jax_example,False,6.128533128000072
+2024-09-02 10:46:28.054346,jax_example.py,,jax_example,False,6.019644059000029
+2024-09-02 10:46:28.054346,jax_example.py,,jax_example,False,5.998681167000086
